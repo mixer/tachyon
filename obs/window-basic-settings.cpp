@@ -2284,7 +2284,7 @@ void OBSBasicSettings::SaveAudioSettings()
 
 	const char *channelSetup = (channelSetupIdx == 0) ? "Mono" : "Stereo";
 
-	int sampleRate = 44100;
+	int sampleRate = 44800;
 	if (sampleRateStr == "48khz")
 		sampleRate = 48000;
 

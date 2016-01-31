@@ -20,11 +20,11 @@
 #include "c99defs.h"
 #include "base.h"
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 static int log_output_level = LOG_DEBUG;
-#else
-static int log_output_level = LOG_INFO;
-#endif
+//#else
+//static int log_output_level = LOG_INFO;
+//#endif
 
 static int  crashing     = 0;
 static void *log_param   = NULL;
