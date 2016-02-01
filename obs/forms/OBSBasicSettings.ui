@@ -113,7 +113,7 @@
      <item>
       <widget class="QStackedWidget" name="settingsPages">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="generalPage">
         <layout class="QFormLayout" name="formLayout_2">
@@ -775,7 +775,7 @@
              <item>
               <widget class="QTabWidget" name="advOutTabs">
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <property name="usesScrollButtons">
                 <bool>true</bool>
@@ -1030,7 +1030,7 @@
                  <item>
                   <widget class="QStackedWidget" name="stackedWidget">
                    <property name="currentIndex">
-                    <number>1</number>
+                    <number>0</number>
                    </property>
                    <widget class="QWidget" name="advOutRecStandard">
                     <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -2299,8 +2299,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>80</width>
-              <height>16</height>
+              <width>96</width>
+              <height>26</height>
              </rect>
             </property>
            </widget>
@@ -2606,8 +2606,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>96</width>
+           <height>26</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="hotkeyLayout">
@@ -2653,8 +2653,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>722</width>
-              <height>579</height>
+              <width>530</width>
+              <height>492</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_16">

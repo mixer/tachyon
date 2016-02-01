@@ -59,6 +59,10 @@ endif()
 
 include_directories(${FREETYPE_INCLUDE_DIRS})
 
+if (WIN32)
+	set(text-freetype2_PLATFORM_DEPS ${ZLIB_LIB})
+endif()
+
 set(text-freetype2_SOURCES
 	find-font.h
 	obs-convenience.c
