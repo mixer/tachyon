@@ -316,6 +316,7 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->advOutFFTrack4,       CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFAEncoder,     COMBO_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFACfg,         EDIT_CHANGED,   OUTPUTS_CHANGED);
+	HookWidget(ui->advOutFFAMuxer,			 EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack1Bitrate,  COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack1Name,     EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack2Bitrate,  COMBO_CHANGED,  OUTPUTS_CHANGED);
@@ -1289,6 +1290,7 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 			"FFAEncoderId");
 	const char *aEncCustom = config_get_string(main->Config(), "AdvOut",
 			"FFACustom");
+	const char *aAMuxer = config_get_string(main->Config(), "AdvOut", "FFAMuxer");
 
 	ui->advOutFFType->setCurrentIndex(saveFile ? 0 : 1);
 	ui->advOutFFRecPath->setText(QT_UTF8(path));
@@ -1305,6 +1307,7 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	ui->advOutFFABitrate->setValue(audioBitrate);
 	SelectEncoder(ui->advOutFFAEncoder, aEncoder, aEncoderId);
 	ui->advOutFFACfg->setText(aEncCustom);
+	ui->advOutFFAMuxer->setText(aAMuxer);
 
 	switch (audioTrack) {
 	case 1: ui->advOutFFTrack1->setChecked(true); break;
@@ -1401,6 +1404,7 @@ void OBSBasicSettings::SetAdvOutputFFmpegEnablement(
 		ui->advOutFFABitrate->setEnabled(enabled);
 		ui->advOutFFAEncoder->setEnabled(enabled || enableEncoder);
 		ui->advOutFFACfg->setEnabled(enabled);
+		ui->advOutFFAMuxer->setEnabled(enabled);
 		ui->advOutFFTrack1->setEnabled(enabled);
 		ui->advOutFFTrack2->setEnabled(enabled);
 		ui->advOutFFTrack3->setEnabled(enabled);
@@ -2259,6 +2263,7 @@ void OBSBasicSettings::SaveOutputSettings()
 	SaveSpinBox(ui->advOutFFABitrate, "AdvOut", "FFABitrate");
 	SaveEncoder(ui->advOutFFAEncoder, "AdvOut", "FFAEncoder");
 	SaveEdit(ui->advOutFFACfg, "AdvOut", "FFACustom");
+	SaveEdit(ui->advOutFFAMuxer, "AdvOut", "FFAMuxer");
 	SaveTrackIndex(main->Config(), "AdvOut", "FFAudioTrack",
 			ui->advOutFFTrack1, ui->advOutFFTrack2,
 			ui->advOutFFTrack3, ui->advOutFFTrack4);

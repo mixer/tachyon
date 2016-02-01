@@ -788,6 +788,8 @@ inline void AdvancedOutput::SetupFFmpeg()
 			"FFAEncoderId");
 	const char *aEncCustom = config_get_string(main->Config(), "AdvOut",
 			"FFACustom");
+	const char *aMuxCustom = config_get_string(main->Config(), "AdvOut",
+			"FFAMuxer");
 	obs_data_t *settings = obs_data_create();
 
 	obs_data_set_string(settings, "url", url);
@@ -798,6 +800,7 @@ inline void AdvancedOutput::SetupFFmpeg()
 	obs_data_set_string(settings, "video_encoder", vEncoder);
 	obs_data_set_int(settings, "video_encoder_id", vEncoderId);
 	obs_data_set_string(settings, "video_settings", vEncCustom);
+	obs_data_set_string(settings, "audio_muxer_settings", aMuxCustom);
 	obs_data_set_int(settings, "audio_bitrate", aBitrate);
 	obs_data_set_string(settings, "audio_encoder", aEncoder);
 	obs_data_set_int(settings, "audio_encoder_id", aEncoderId);
