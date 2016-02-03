@@ -277,14 +277,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->simpleOutRecQuality,  COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutRecEncoder,  COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutMuxCustom,   EDIT_CHANGED,   OUTPUTS_CHANGED);
-	HookWidget(ui->advOutEncoder,        COMBO_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutUseRescale,     CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutRescale,        CBEDIT_CHANGED, OUTPUTS_CHANGED);
-	HookWidget(ui->advOutTrack1,         CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutTrack2,         CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutTrack3,         CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutTrack4,         CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutApplyService,   CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutRecType,        COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutRecPath,        EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutNoSpace,        CHECK_CHANGED,  OUTPUTS_CHANGED);
@@ -533,24 +525,6 @@ void OBSBasicSettings::LoadServiceTypes()
 
 void OBSBasicSettings::LoadEncoderTypes()
 {
-	const char    *type;
-	size_t        idx = 0;
-
-	ui->advOutRecEncoder->addItem(TEXT_USE_STREAM_ENC, "none");
-
-	while (obs_enum_encoder_types(idx++, &type)) {
-		const char *name = obs_encoder_get_display_name(type);
-		const char *codec = obs_get_encoder_codec(type);
-
-		if (strcmp(codec, "h264") != 0)
-			continue;
-
-		QString qName = QT_UTF8(name);
-		QString qType = QT_UTF8(type);
-
-		ui->advOutEncoder->addItem(qName, qType);
-		ui->advOutRecEncoder->addItem(qName, qType);
-	}
 }
 
 #define CS_PARTIAL_STR QTStr("Basic.Settings.Advanced.Video.ColorRange.Partial")
@@ -826,14 +800,12 @@ void OBSBasicSettings::ResetDownscales(uint32_t cx, uint32_t cy)
 	uint32_t out_cx = outputCX;
 	uint32_t out_cy = outputCY;
 
-	advRescale = ui->advOutRescale->lineEdit()->text();
 	advRecRescale = ui->advOutRecRescale->lineEdit()->text();
 	advFFRescale = ui->advOutFFRescale->lineEdit()->text();
 
 	ui->outputResolution->blockSignals(true);
 
 	ui->outputResolution->clear();
-	ui->advOutRescale->clear();
 	ui->advOutRecRescale->clear();
 	ui->advOutFFRescale->clear();
 
@@ -860,7 +832,6 @@ void OBSBasicSettings::ResetDownscales(uint32_t cx, uint32_t cy)
 		string res = ResString(downscaleCX, downscaleCY);
 		string outRes = ResString(outDownscaleCX, outDownscaleCY);
 		ui->outputResolution->addItem(res.c_str());
-		ui->advOutRescale->addItem(outRes.c_str());
 		ui->advOutRecRescale->addItem(outRes.c_str());
 		ui->advOutFFRescale->addItem(outRes.c_str());
 
@@ -895,8 +866,6 @@ void OBSBasicSettings::ResetDownscales(uint32_t cx, uint32_t cy)
 	if (advFFRescale.isEmpty())
 		advFFRescale = res.c_str();
 
-	ui->advOutRescale->lineEdit()->setText(advRescale);
-	ui->advOutRecRescale->lineEdit()->setText(advRecRescale);
 	ui->advOutFFRescale->lineEdit()->setText(advFFRescale);
 }
 
@@ -1070,26 +1039,6 @@ void OBSBasicSettings::LoadSimpleOutputSettings()
 
 void OBSBasicSettings::LoadAdvOutputStreamingSettings()
 {
-	bool rescale = config_get_bool(main->Config(), "AdvOut",
-			"Rescale");
-	const char *rescaleRes = config_get_string(main->Config(), "AdvOut",
-			"RescaleRes");
-	int trackIndex = config_get_int(main->Config(), "AdvOut",
-			"TrackIndex");
-	bool applyServiceSettings = config_get_bool(main->Config(), "AdvOut",
-			"ApplyServiceSettings");
-
-	ui->advOutApplyService->setChecked(applyServiceSettings);
-	ui->advOutUseRescale->setChecked(rescale);
-	ui->advOutRescale->setEnabled(rescale);
-	ui->advOutRescale->setCurrentText(rescaleRes);
-
-	switch (trackIndex) {
-	case 1: ui->advOutTrack1->setChecked(true); break;
-	case 2: ui->advOutTrack2->setChecked(true); break;
-	case 3: ui->advOutTrack3->setChecked(true); break;
-	case 4: ui->advOutTrack4->setChecked(true); break;
-	}
 }
 
 OBSPropertiesView *OBSBasicSettings::CreateEncoderPropertyView(
@@ -1121,20 +1070,6 @@ OBSPropertiesView *OBSBasicSettings::CreateEncoderPropertyView(
 
 void OBSBasicSettings::LoadAdvOutputStreamingEncoderProperties()
 {
-	const char *encoder = config_get_string(main->Config(), "AdvOut",
-			"Encoder");
-
-	delete streamEncoderProps;
-	streamEncoderProps = CreateEncoderPropertyView(encoder,
-			"streamEncoder.json");
-	ui->advOutputStreamTab->layout()->addWidget(streamEncoderProps);
-
-	connect(streamEncoderProps, SIGNAL(Changed()),
-			this, SLOT(UpdateStreamDelayEstimate()));
-
-	SetComboByValue(ui->advOutEncoder, encoder);
-
-	UpdateStreamDelayEstimate();
 }
 
 void OBSBasicSettings::LoadAdvOutputRecordingSettings()
@@ -1337,7 +1272,6 @@ void OBSBasicSettings::LoadOutputSettings()
 	if (video_output_active(obs_get_video())) {
 		ui->outputMode->setEnabled(false);
 		ui->outputModeLabel->setEnabled(false);
-		ui->advOutTopContainer->setEnabled(false);
 		ui->advOutRecTopContainer->setEnabled(false);
 		ui->advOutRecTypeContainer->setEnabled(false);
 		ui->advOutputAudioTracksTab->setEnabled(false);
@@ -2169,14 +2103,6 @@ void OBSBasicSettings::SaveOutputSettings()
 	SaveComboData(ui->simpleOutRecEncoder, "SimpleOutput", "RecEncoder");
 	SaveEdit(ui->simpleOutMuxCustom, "SimpleOutput", "MuxerCustom");
 
-	SaveCheckBox(ui->advOutApplyService, "AdvOut", "ApplyServiceSettings");
-	SaveComboData(ui->advOutEncoder, "AdvOut", "Encoder");
-	SaveCheckBox(ui->advOutUseRescale, "AdvOut", "Rescale");
-	SaveCombo(ui->advOutRescale, "AdvOut", "RescaleRes");
-	SaveTrackIndex(main->Config(), "AdvOut", "TrackIndex",
-			ui->advOutTrack1, ui->advOutTrack2,
-			ui->advOutTrack3, ui->advOutTrack4);
-
 	config_set_string(main->Config(), "AdvOut", "RecType",
 			RecTypeFromIdx(ui->advOutRecType->currentIndex()));
 
@@ -2479,18 +2405,6 @@ void OBSBasicSettings::on_advOutFFPathBrowse_clicked()
 		return;
 
 	ui->advOutFFRecPath->setText(dir);
-}
-
-void OBSBasicSettings::on_advOutEncoder_currentIndexChanged(int idx)
-{
-	QString encoder = GetComboData(ui->advOutEncoder);
-
-	delete streamEncoderProps;
-	streamEncoderProps = CreateEncoderPropertyView(QT_TO_UTF8(encoder),
-			"streamEncoder.json", true);
-	ui->advOutputStreamTab->layout()->addWidget(streamEncoderProps);
-
-	UNUSED_PARAMETER(idx);
 }
 
 void OBSBasicSettings::on_advOutRecEncoder_currentIndexChanged(int idx)
