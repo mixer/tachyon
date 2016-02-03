@@ -20,6 +20,7 @@
 
 #include <util/util.hpp>
 #include <QDialog>
+#include <QPushButton>
 #include <memory>
 #include <string>
 
@@ -243,7 +244,6 @@ private slots:
 	void on_advOutFFFormat_currentIndexChanged(int idx);
 	void on_advOutFFAEncoder_currentIndexChanged(int idx);
 	void on_advOutFFVEncoder_currentIndexChanged(int idx);
-	void on_advOutFFType_currentIndexChanged(int idx);
 
 	void on_colorFormat_currentIndexChanged(const QString &text);
 

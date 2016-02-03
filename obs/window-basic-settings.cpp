@@ -264,9 +264,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->theme, 		     COMBO_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStart,CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStop, CHECK_CHANGED,  GENERAL_CHANGED);
-	HookWidget(ui->advOutFFType,         COMBO_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFFRecPath,      EDIT_CHANGED,   OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFFNoSpace,      CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFURL,          EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFFormat,       COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFMCfg,         EDIT_CHANGED,   OUTPUTS_CHANGED);
@@ -1011,12 +1008,8 @@ static void SelectEncoder(QComboBox *combo, const char *name, int id)
 
 void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 {
-	bool saveFile = config_get_bool(main->Config(), "AdvOut",
-			"FFOutputToFile");
 	const char *path = config_get_string(main->Config(), "AdvOut",
 			"FFFilePath");
-	bool noSpace = config_get_bool(main->Config(), "AdvOut",
-			"FFFileNameWithoutSpace");
 	const char *url = config_get_string(main->Config(), "AdvOut", "FFURL");
 	const char *format = config_get_string(main->Config(), "AdvOut",
 			"FFFormat");
@@ -1048,9 +1041,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 			"FFACustom");
 	const char *aAMuxer = config_get_string(main->Config(), "AdvOut", "FFAMuxer");
 
-	ui->advOutFFType->setCurrentIndex(saveFile ? 0 : 1);
-	ui->advOutFFRecPath->setText(QT_UTF8(path));
-	ui->advOutFFNoSpace->setChecked(noSpace);
 	ui->advOutFFURL->setText(QT_UTF8(url));
 	SelectFormat(ui->advOutFFFormat, format, mimeType);
 	ui->advOutFFMCfg->setText(muxCustom);
@@ -1939,10 +1929,6 @@ void OBSBasicSettings::SaveEncoder(QComboBox *combo, const char *section,
 
 void OBSBasicSettings::SaveOutputSettings()
 {
-	config_set_bool(main->Config(), "AdvOut", "FFOutputToFile",
-			ui->advOutFFType->currentIndex() == 0 ? true : false);
-	SaveEdit(ui->advOutFFRecPath, "AdvOut", "FFFilePath");
-	SaveCheckBox(ui->advOutFFNoSpace, "AdvOut", "FFFileNameWithoutSpace");
 	SaveEdit(ui->advOutFFURL, "AdvOut", "FFURL");
 	SaveFormat(ui->advOutFFFormat);
 	SaveEdit(ui->advOutFFMCfg, "AdvOut", "FFMCustom");
@@ -2238,11 +2224,6 @@ void OBSBasicSettings::on_advOutFFVEncoder_currentIndexChanged(int idx)
 		SetAdvOutputFFmpegEnablement(FF_CODEC_VIDEO,
 				desc.id != 0 || desc.name != nullptr, true);
 	}
-}
-
-void OBSBasicSettings::on_advOutFFType_currentIndexChanged(int idx)
-{
-	ui->advOutFFNoSpace->setHidden(idx != 0);
 }
 
 void OBSBasicSettings::on_colorFormat_currentIndexChanged(const QString &text)
