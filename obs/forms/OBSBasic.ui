@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>957</width>
+    <width>1112</width>
     <height>724</height>
    </rect>
   </property>
@@ -110,25 +110,6 @@
            <number>2</number>
           </property>
           <item>
-           <widget class="QPushButton" name="streamButton">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Basic.Main.StartStreaming</string>
-            </property>
-            <property name="checkable">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="recordButton">
             <property name="enabled">
              <bool>true</bool>
@@ -146,7 +127,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Basic.Main.StartRecording</string>
+             <string>Basic.Main.StartStreaming</string>
             </property>
            </widget>
           </item>
@@ -229,7 +210,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>201</width>
+             <width>203</width>
              <height>16</height>
             </rect>
            </property>
@@ -693,8 +674,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>957</width>
-     <height>21</height>
+     <width>1112</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

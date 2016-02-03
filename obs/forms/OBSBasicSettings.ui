@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>968</width>
-    <height>667</height>
+    <height>697</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -113,7 +113,7 @@
      <item>
       <widget class="QStackedWidget" name="settingsPages">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="generalPage">
         <layout class="QFormLayout" name="formLayout_2">
@@ -2299,8 +2299,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>96</width>
-              <height>26</height>
+              <width>98</width>
+              <height>28</height>
              </rect>
             </property>
            </widget>
@@ -2606,8 +2606,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>96</width>
-           <height>26</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="hotkeyLayout">
@@ -2653,8 +2653,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>530</width>
-              <height>492</height>
+              <width>722</width>
+              <height>579</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_16">

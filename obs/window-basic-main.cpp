@@ -173,7 +173,7 @@ OBSBasic::OBSBasic(QWidget *parent)
 	installEventFilter(CreateShortcutFilter());
 
 	stringstream name;
-	name << "OBS " << App()->GetVersionString();	
+	name << "OBS " << App()->GetVersionString();
 	blog(LOG_INFO, "%s", name.str().c_str());
 	blog(LOG_INFO, "---------------------------------");
 
@@ -3166,7 +3166,7 @@ void OBSBasic::OpenSceneFilters()
 void OBSBasic::StartStreaming()
 {
 	SaveProject();
-
+#if 0
 	ui->streamButton->setEnabled(false);
 	ui->streamButton->setText(QTStr("Basic.Main.Connecting"));
 
@@ -3174,6 +3174,7 @@ void OBSBasic::StartStreaming()
 		ui->streamButton->setText(QTStr("Basic.Main.StartStreaming"));
 		ui->streamButton->setEnabled(true);
 	}
+#endif
 }
 
 void OBSBasic::StopStreaming()
@@ -3204,6 +3205,8 @@ void OBSBasic::ForceStopStreaming()
 
 void OBSBasic::StreamDelayStarting(int sec)
 {
+	UNUSED_PARAMETER(sec);
+#if 0
 	ui->streamButton->setText(QTStr("Basic.Main.StopStreaming"));
 	ui->streamButton->setEnabled(true);
 
@@ -3223,10 +3226,13 @@ void OBSBasic::StreamDelayStarting(int sec)
 		ui->profileMenu->setEnabled(false);
 		App()->IncrementSleepInhibition();
 	}
+#endif
 }
 
 void OBSBasic::StreamDelayStopping(int sec)
 {
+	UNUSED_PARAMETER(sec);
+#if 0
 	ui->streamButton->setText(QTStr("Basic.Main.StartStreaming"));
 	ui->streamButton->setEnabled(true);
 
@@ -3241,10 +3247,12 @@ void OBSBasic::StreamDelayStopping(int sec)
 	ui->streamButton->setMenu(startStreamMenu);
 
 	ui->statusbar->StreamDelayStopping(sec);
+#endif
 }
 
 void OBSBasic::StreamingStart()
 {
+#if 0
 	ui->streamButton->setText(QTStr("Basic.Main.StopStreaming"));
 	ui->streamButton->setEnabled(true);
 	ui->statusbar->StreamStarted(outputHandler->streamOutput);
@@ -3255,10 +3263,13 @@ void OBSBasic::StreamingStart()
 	}
 
 	blog(LOG_INFO, STREAMING_START);
+#endif
 }
 
 void OBSBasic::StreamingStop(int code)
 {
+	UNUSED_PARAMETER(code);
+#if 0
 	const char *errorMessage;
 
 	switch (code) {
@@ -3307,6 +3318,7 @@ void OBSBasic::StreamingStop(int code)
 		startStreamMenu->deleteLater();
 		startStreamMenu = nullptr;
 	}
+#endif
 }
 
 void OBSBasic::StartRecording()
@@ -3333,7 +3345,10 @@ void OBSBasic::StopRecording()
 void OBSBasic::RecordingStart()
 {
 	ui->statusbar->RecordingStarted(outputHandler->fileOutput);
-	ui->recordButton->setText(QTStr("Basic.Main.StopRecording"));
+
+	// Remember: recording button was hijacked for good config_has_user_value
+	// (thats my story and I'm sticking with it)
+	ui->recordButton->setText(QTStr("Basic.Main.StopStreaming"));
 
 	if (ui->profileMenu->isEnabled()) {
 		ui->profileMenu->setEnabled(false);
@@ -3346,7 +3361,10 @@ void OBSBasic::RecordingStart()
 void OBSBasic::RecordingStop(int code)
 {
 	ui->statusbar->RecordingStopped();
-	ui->recordButton->setText(QTStr("Basic.Main.StartRecording"));
+
+	// Remember: recording button was hijacked for good config_has_user_value
+	// (thats my story and I'm sticking with it)
+	ui->recordButton->setText(QTStr("Basic.Main.StartStreaming"));
 	blog(LOG_INFO, RECORDING_STOP);
 
 	if (code == OBS_OUTPUT_UNSUPPORTED) {
