@@ -264,7 +264,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->theme, 		     COMBO_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStart,CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStop, CHECK_CHANGED,  GENERAL_CHANGED);
-	HookWidget(ui->advOutRecType,        COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFType,         COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFRecPath,      EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFNoSpace,      CHECK_CHANGED,  OUTPUTS_CHANGED);
@@ -1126,7 +1125,6 @@ void OBSBasicSettings::LoadOutputSettings()
 	LoadAdvOutputAudioSettings();
 
 	if (video_output_active(obs_get_video())) {
-		ui->advOutRecTypeContainer->setEnabled(false);
 		ui->advOutputAudioTracksTab->setEnabled(false);
 	}
 
@@ -1941,9 +1939,6 @@ void OBSBasicSettings::SaveEncoder(QComboBox *combo, const char *section,
 
 void OBSBasicSettings::SaveOutputSettings()
 {
-	config_set_string(main->Config(), "AdvOut", "RecType",
-			RecTypeFromIdx(ui->advOutRecType->currentIndex()));
-
 	config_set_bool(main->Config(), "AdvOut", "FFOutputToFile",
 			ui->advOutFFType->currentIndex() == 0 ? true : false);
 	SaveEdit(ui->advOutFFRecPath, "AdvOut", "FFFilePath");

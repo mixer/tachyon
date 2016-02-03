@@ -104,7 +104,7 @@
      <item>
       <widget class="QStackedWidget" name="settingsPages">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="generalPage">
         <layout class="QFormLayout" name="formLayout_2">
@@ -215,7 +215,7 @@
                </property>
                <widget class="QWidget" name="advOutputRecordTab">
                 <attribute name="title">
-                 <string>Basic.Settings.Output.Adv.Recording</string>
+                 <string>Basic.Settings.Output.Adv.Streaming</string>
                 </attribute>
                 <layout class="QVBoxLayout" name="verticalLayout_11">
                  <property name="leftMargin">
@@ -245,44 +245,7 @@
                     <property name="bottomMargin">
                      <number>0</number>
                     </property>
-                    <item row="0" column="0">
-                     <widget class="QLabel" name="label_31">
-                      <property name="minimumSize">
-                       <size>
-                        <width>170</width>
-                        <height>0</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>Basic.Settings.Output.Adv.Recording.Type</string>
-                      </property>
-                      <property name="alignment">
-                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="0" column="1">
-                     <widget class="QComboBox" name="advOutRecType">
-                      <item>
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.Recording.Type.Standard</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.Recording.Type.FFmpegOutput</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
                    </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="Line" name="line_3">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
                   </widget>
                  </item>
                  <item>
@@ -301,6 +264,42 @@
                      <property name="topMargin">
                       <number>0</number>
                      </property>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="label_48">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>170</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.Type</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QComboBox" name="advOutFFType">
+                       <item>
+                        <property name="text">
+                         <string>Basic.Settings.Output.Adv.FFmpeg.Type.RecordToFile</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Basic.Settings.Output.Adv.FFmpeg.Type.URL</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
                      <item row="1" column="0">
                       <widget class="QLabel" name="label_36">
                        <property name="sizePolicy">
@@ -349,13 +348,6 @@
                           <widget class="QLineEdit" name="advOutFFRecPath">
                            <property name="readOnly">
                             <bool>true</bool>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QPushButton" name="advOutFFPathBrowse">
-                           <property name="text">
-                            <string>Browse</string>
                            </property>
                           </widget>
                          </item>
@@ -412,6 +404,16 @@
                         <string/>
                        </property>
                       </widget>
+                     </item>
+                     <item row="5" column="0">
+                      <widget class="QLabel" name="label_1337">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.MuxerSettings</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QLineEdit" name="advOutFFMCfg"/>
                      </item>
                      <item row="6" column="0">
                       <widget class="QLabel" name="label_40">
@@ -564,6 +566,16 @@
                        </layout>
                       </widget>
                      </item>
+                     <item row="13" column="0">
+                      <widget class="QLabel" name="label_7">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.AMuxerSettings</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="1">
+                      <widget class="QLineEdit" name="advOutFFAMuxer"/>
+                     </item>
                      <item row="15" column="0">
                       <widget class="QLabel" name="label_39">
                        <property name="text">
@@ -584,52 +596,6 @@
                      <item row="16" column="1">
                       <widget class="QLineEdit" name="advOutFFACfg"/>
                      </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_48">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>170</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.Type</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QComboBox" name="advOutFFType">
-                       <item>
-                        <property name="text">
-                         <string>Basic.Settings.Output.Adv.FFmpeg.Type.RecordToFile</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>Basic.Settings.Output.Adv.FFmpeg.Type.URL</string>
-                        </property>
-                       </item>
-                      </widget>
-                     </item>
-                     <item row="5" column="0">
-                      <widget class="QLabel" name="label_1337">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.MuxerSettings</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="1">
-                      <widget class="QLineEdit" name="advOutFFMCfg"/>
-                     </item>
                      <item row="2" column="1">
                       <widget class="QCheckBox" name="advOutFFNoSpace">
                        <property name="text">
@@ -637,16 +603,6 @@
                        </property>
                        <property name="checked">
                         <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="13" column="1">
-                      <widget class="QLineEdit" name="advOutFFAMuxer"/>
-                     </item>
-                     <item row="13" column="0">
-                      <widget class="QLabel" name="label_7">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.AMuxerSettings</string>
                        </property>
                       </widget>
                      </item>
@@ -1285,8 +1241,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>787</width>
-              <height>79</height>
+              <width>65</width>
+              <height>16</height>
              </rect>
             </property>
            </widget>
@@ -2028,22 +1984,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>advOutRecType</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>stackedWidget</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>705</x>
-     <y>144</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>396</x>
-     <y>245</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>advOutFFUseRescale</sender>
    <signal>toggled(bool)</signal>
    <receiver>advOutFFRescale</receiver>
@@ -2056,22 +1996,6 @@
     <hint type="destinationlabel">
      <x>748</x>
      <y>344</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>advOutFFType</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>stackedWidget_2</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>864</x>
-     <y>141</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>427</x>
-     <y>215</y>
     </hint>
    </hints>
   </connection>
@@ -2184,6 +2108,22 @@
     <hint type="destinationlabel">
      <x>777</x>
      <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>advOutFFType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>stackedWidget_2</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>864</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>427</x>
+     <y>215</y>
     </hint>
    </hints>
   </connection>
