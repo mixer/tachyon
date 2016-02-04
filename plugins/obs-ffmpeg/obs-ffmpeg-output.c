@@ -33,7 +33,7 @@
 #include "obs-ffmpeg-compat.h"
 
 struct ffmpeg_cfg {
-	const char         *url;
+	char         			 url[2048];
 	const char         *format_name;
 	const char         *format_mime_type;
 	char				 			 audio_muxer_settings[2048];
@@ -55,6 +55,7 @@ struct ffmpeg_cfg {
 	int                height;
 
 	/* FTL specific fields */
+	const char			   *ingest_location;
 	uint32_t					channel_id;
 	const char				*stream_key;
 	uint32_t					audio_ssrc;
@@ -1030,7 +1031,7 @@ static bool try_connect(struct ffmpeg_output *output)
 	int ret;
 
 	settings = obs_output_get_settings(output->output);
-	config.url = obs_data_get_string(settings, "url");
+	config.ingest_location = get_string_or_null(settings, "url");
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
 			"format_mime_type");
@@ -1062,6 +1063,23 @@ static bool try_connect(struct ffmpeg_output *output)
 		return false;
 	}
 
+	/* Build the RTP command line */
+	if (config.ingest_location == NULL) {
+		blog(LOG_WARNING, "ingest location blank");
+		return false;
+	}
+
+	if (config.stream_key == NULL) {
+		blog(LOG_WARNING, "stream key incorrect");
+		return false;
+	}
+
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1420", config.ingest_location);
+	if (size == 2048) {
+		blog(LOG_WARNING, "snprintf failed on URL");
+		return false;
+	}
+
 	if (format_is_yuv(voi->format)) {
 		config.color_range = voi->range == VIDEO_RANGE_FULL ?
 			AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG;
@@ -1090,7 +1108,7 @@ static bool try_connect(struct ffmpeg_output *output)
      return false;
    }
 
-	ftl_set_ingest_location(output->stream_config, "127.0.0.1");
+	ftl_set_ingest_location(output->stream_config, config.ingest_location);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
 	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);

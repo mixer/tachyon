@@ -1315,9 +1315,11 @@ static void move_to_xdg(void)
 
 static bool update_ffmpeg_output(ConfigFile &config)
 {
+	return false;
 //	if (config_has_user_value(config, "AdvOut", "FFOutputToFile"))
 //		return false;
 
+#if 0
 	const char *url = config_get_string(config, "AdvOut", "FFURL");
 	if (!url)
 		return false;
@@ -1350,6 +1352,7 @@ static bool update_ffmpeg_output(ConfigFile &config)
 	config_set_string(config, "AdvOut", "FFExtension", extension.c_str());
 	config_set_bool(config, "AdvOut", "FFOutputToFile", true);
 	return true;
+	#endif
 }
 
 static bool move_reconnect_settings(ConfigFile &config, const char *sec)
