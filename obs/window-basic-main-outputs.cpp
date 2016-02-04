@@ -564,7 +564,8 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 	const char *recordEncoder = config_get_string(main->Config(), "AdvOut",
 			"RecEncoder");
 
-	ffmpegOutput = astrcmpi(recType, "FFmpeg") == 0;
+	//ffmpegOutput = astrcmpi(recType, "FFmpeg") == 0;
+	ffmpegOutput = 1;
 	ffmpegRecording = ffmpegOutput &&
 		config_get_bool(main->Config(), "AdvOut", "FFOutputToFile");
 	useStreamEncoder = astrcmpi(recordEncoder, "none") == 0;
