@@ -265,7 +265,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->warnBeforeStreamStart,CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStop, CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->advOutFFURL,          EDIT_CHANGED,   OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFFFormat,       COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFMCfg,         EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFVBitrate,     SCROLL_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFUseRescale,   CHECK_CHANGED,  OUTPUTS_CHANGED);
@@ -497,35 +496,6 @@ void OBSBasicSettings::LoadColorRanges()
 
 void OBSBasicSettings::LoadFormats()
 {
-	ui->advOutFFFormat->blockSignals(true);
-
-	formats.reset(ff_format_supported());
-	const ff_format_desc *format = formats.get();
-
-	while(format != nullptr) {
-		bool audio = ff_format_desc_has_audio(format);
-		bool video = ff_format_desc_has_video(format);
-		FormatDesc formatDesc(ff_format_desc_name(format),
-				ff_format_desc_mime_type(format),
-				format);
-		if (audio || video) {
-			QString itemText(ff_format_desc_name(format));
-			if (audio ^ video)
-				itemText += QString(" (%1)").arg(
-						audio ? AUDIO_STR : VIDEO_STR);
-
-			ui->advOutFFFormat->addItem(itemText,
-					qVariantFromValue(formatDesc));
-		}
-
-		format = ff_format_desc_next(format);
-	}
-
-	ui->advOutFFFormat->model()->sort(0);
-
-	ui->advOutFFFormat->insertItem(0, AV_FORMAT_DEFAULT_STR);
-
-	ui->advOutFFFormat->blockSignals(false);
 }
 
 static void AddCodec(QComboBox *combo, const ff_codec_desc *codec_desc)
@@ -1008,13 +978,7 @@ static void SelectEncoder(QComboBox *combo, const char *name, int id)
 
 void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 {
-	const char *path = config_get_string(main->Config(), "AdvOut",
-			"FFFilePath");
 	const char *url = config_get_string(main->Config(), "AdvOut", "FFURL");
-	const char *format = config_get_string(main->Config(), "AdvOut",
-			"FFFormat");
-	const char *mimeType = config_get_string(main->Config(), "AdvOut",
-			"FFFormatMimeType");
 	const char *muxCustom = config_get_string(main->Config(), "AdvOut",
 			"FFMCustom");
 	int videoBitrate = config_get_int(main->Config(), "AdvOut",
@@ -1042,7 +1006,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	const char *aAMuxer = config_get_string(main->Config(), "AdvOut", "FFAMuxer");
 
 	ui->advOutFFURL->setText(QT_UTF8(url));
-	SelectFormat(ui->advOutFFFormat, format, mimeType);
 	ui->advOutFFMCfg->setText(muxCustom);
 	ui->advOutFFVBitrate->setValue(videoBitrate);
 	ui->advOutFFUseRescale->setChecked(rescale);
@@ -1930,7 +1893,6 @@ void OBSBasicSettings::SaveEncoder(QComboBox *combo, const char *section,
 void OBSBasicSettings::SaveOutputSettings()
 {
 	SaveEdit(ui->advOutFFURL, "AdvOut", "FFURL");
-	SaveFormat(ui->advOutFFFormat);
 	SaveEdit(ui->advOutFFMCfg, "AdvOut", "FFMCustom");
 	SaveSpinBox(ui->advOutFFVBitrate, "AdvOut", "FFVBitrate");
 	SaveCheckBox(ui->advOutFFUseRescale, "AdvOut", "FFRescale");
@@ -2170,39 +2132,6 @@ void OBSBasicSettings::on_buttonBox_clicked(QAbstractButton *button)
 		}
 		ClearChanged();
 		close();
-	}
-}
-
-#define DEFAULT_CONTAINER_STR \
-	QTStr("Basic.Settings.Output.Adv.FFmpeg.FormatDescDef")
-
-void OBSBasicSettings::on_advOutFFFormat_currentIndexChanged(int idx)
-{
-	const QVariant itemDataVariant = ui->advOutFFFormat->itemData(idx);
-
-	if (!itemDataVariant.isNull()) {
-		FormatDesc desc = itemDataVariant.value<FormatDesc>();
-		SetAdvOutputFFmpegEnablement(FF_CODEC_AUDIO,
-				ff_format_desc_has_audio(desc.desc),
-				false);
-		SetAdvOutputFFmpegEnablement(FF_CODEC_VIDEO,
-				ff_format_desc_has_video(desc.desc),
-				false);
-		ReloadCodecs(desc.desc);
-		ui->advOutFFFormatDesc->setText(ff_format_desc_long_name(
-				desc.desc));
-
-		CodecDesc defaultAudioCodecDesc =
-			GetDefaultCodecDesc(desc.desc, FF_CODEC_AUDIO);
-		CodecDesc defaultVideoCodecDesc =
-			GetDefaultCodecDesc(desc.desc, FF_CODEC_VIDEO);
-		SelectEncoder(ui->advOutFFAEncoder, defaultAudioCodecDesc.name,
-				defaultAudioCodecDesc.id);
-		SelectEncoder(ui->advOutFFVEncoder, defaultVideoCodecDesc.name,
-				defaultVideoCodecDesc.id);
-	} else {
-		ReloadCodecs(nullptr);
-		ui->advOutFFFormatDesc->setText(DEFAULT_CONTAINER_STR);
 	}
 }
 
