@@ -266,8 +266,7 @@ void SimpleOutput::Update()
 	int videoBitrate = config_get_uint(main->Config(), "SimpleOutput",
 			"VBitrate");
 	int audioBitrate = GetAudioBitrate();
-	bool advanced = config_get_bool(main->Config(), "SimpleOutput",
-			"UseAdvanced");
+	bool advanced = 1;
 	const char *preset = config_get_string(main->Config(),
 			"SimpleOutput", "Preset");
 	const char *custom = config_get_string(main->Config(),
@@ -566,9 +565,8 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 
 	//ffmpegOutput = astrcmpi(recType, "FFmpeg") == 0;
 	ffmpegOutput = 1;
-	ffmpegRecording = ffmpegOutput &&
-		config_get_bool(main->Config(), "AdvOut", "FFOutputToFile");
-	useStreamEncoder = astrcmpi(recordEncoder, "none") == 0;
+	ffmpegRecording = 0; // Controls if URL is respected, or uses auto-file
+	useStreamEncoder = 0;
 
 	OBSData streamEncSettings = GetDataFromJsonFile("streamEncoder.json");
 	OBSData recordEncSettings = GetDataFromJsonFile("recordEncoder.json");

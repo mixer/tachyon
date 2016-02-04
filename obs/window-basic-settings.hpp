@@ -241,9 +241,6 @@ private slots:
 	void on_listWidget_itemSelectionChanged();
 	void on_buttonBox_clicked(QAbstractButton *button);
 
-	void on_advOutFFAEncoder_currentIndexChanged(int idx);
-	void on_advOutFFVEncoder_currentIndexChanged(int idx);
-
 	void on_colorFormat_currentIndexChanged(const QString &text);
 
 	void on_outputResolution_editTextChanged(const QString &text);

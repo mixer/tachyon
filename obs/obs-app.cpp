@@ -999,7 +999,7 @@ static auto SnapshotRelease = [](profiler_snapshot_t *snap)
 	profile_snapshot_free(snap);
 };
 
-using ProfilerSnapshot = 
+using ProfilerSnapshot =
 	std::unique_ptr<profiler_snapshot_t, decltype(SnapshotRelease)>;
 
 ProfilerSnapshot GetSnapshot()
@@ -1315,8 +1315,8 @@ static void move_to_xdg(void)
 
 static bool update_ffmpeg_output(ConfigFile &config)
 {
-	if (config_has_user_value(config, "AdvOut", "FFOutputToFile"))
-		return false;
+//	if (config_has_user_value(config, "AdvOut", "FFOutputToFile"))
+//		return false;
 
 	const char *url = config_get_string(config, "AdvOut", "FFURL");
 	if (!url)

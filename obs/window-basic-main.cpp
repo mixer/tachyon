@@ -866,8 +866,8 @@ void OBSBasic::ResetOutputs()
 {
 	ProfileScope("OBSBasic::ResetOutputs");
 
-	const char *mode = config_get_string(basicConfig, "Output", "Mode");
-	bool advOut = astrcmpi(mode, "Advanced") == 0;
+	/* Force use of advanced output mode */
+	bool advOut = true;
 
 	if (!outputHandler || !outputHandler->Active()) {
 		outputHandler.reset();

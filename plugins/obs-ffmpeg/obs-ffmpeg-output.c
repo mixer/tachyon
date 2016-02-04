@@ -111,21 +111,13 @@ struct ffmpeg_output {
 /* ------------------------------------------------------------------------- */
 
 static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
-		AVCodec **codec, enum AVCodecID id, const char *name, int audio)
+		AVCodec **codec, enum AVCodecID id, int audio)
 {
-	*codec = (!!name && *name) ?
-		avcodec_find_encoder_by_name(name) :
-		avcodec_find_encoder(id);
-
-	if (!*codec) {
-		blog(LOG_WARNING, "Couldn't find encoder '%s'",
-				avcodec_get_name(id));
-		return false;
-	}
-
 	if (audio == 1) {
+		*codec = avcodec_find_encoder(AV_CODEC_ID_OPUS);
 		*stream = avformat_new_stream(data->output_audio, *codec);
 	} else {
+		*codec = avcodec_find_encoder(AV_CODEC_ID_VP8);
 		*stream = avformat_new_stream(data->output_video, *codec);
 	}
 	if (!*stream) {
@@ -169,11 +161,11 @@ static void parse_params(AVCodecContext *context, char **opts)
 static bool open_video_codec(struct ffmpeg_data *data)
 {
 	AVCodecContext *context = data->video->codec;
-	char **opts = strlist_split(data->config.video_settings, ' ', false);
-	int ret;
 
-	if (strcmp(data->vcodec->name, "libx264") == 0)
-		av_opt_set(context->priv_data, "preset", "veryfast", 0);
+	/* Hardcode in quality=realtime */
+//	char **opts = strlist_split(data->config.video_settings, ' ', false);
+	char **opts = strlist_split("quality=realtime", ' ', false);
+	int ret;
 
 	if (opts) {
 		parse_params(context, opts);
@@ -241,14 +233,21 @@ static bool create_video_stream(struct ffmpeg_data *data)
 
 	if (!new_stream(data, &data->video, &data->vcodec,
 				data->output_video->oformat->video_codec,
-				data->config.video_encoder, 0)) {
+				0)) {
 		blog(LOG_ERROR, "new_stream() failed to make video codec");
 		return false;
 	}
 
-	closest_format = get_closest_format(data->config.format,
-			data->vcodec->pix_fmts);
+	//closest_format = get_closest_format(data->config.format,
+	//		data->vcodec->pix_fmts);
 
+	/**
+	 * closest_format hardcoded for VP8 as removing encoder boxes from the UI
+	 * broke this. Annoying but managable. Acceptable PIX_FMTS gotten from FFmpeg
+	 * source codec
+	 */
+
+	closest_format 					= AV_PIX_FMT_YUV420P;
 	context                 = data->video->codec;
 	context->bit_rate       = data->config.video_bitrate * 1000;
 	context->width          = data->config.scale_width;
@@ -333,7 +332,7 @@ static bool create_audio_stream(struct ffmpeg_data *data)
 
 	if (!new_stream(data, &data->audio, &data->acodec,
 				data->output_audio->oformat->audio_codec,
-				data->config.audio_encoder, 1))
+				1))
 		return false;
 
 	context              = data->audio->codec;
@@ -1033,20 +1032,11 @@ static bool try_connect(struct ffmpeg_output *output)
 	config.muxer_settings = obs_data_get_string(settings, "muxer_settings");
 	config.video_bitrate = (int)obs_data_get_int(settings, "video_bitrate");
 	config.audio_bitrate = (int)obs_data_get_int(settings, "audio_bitrate");
-	config.video_encoder = get_string_or_null(settings, "video_encoder");
-	config.video_encoder_id = (int)obs_data_get_int(settings,
-			"video_encoder_id");
-	config.audio_encoder = get_string_or_null(settings, "audio_encoder");
-	config.audio_encoder_id = (int)obs_data_get_int(settings,
-			"audio_encoder_id");
-	config.video_settings = obs_data_get_string(settings, "video_settings");
-	config.audio_settings = obs_data_get_string(settings, "audio_settings");
 	config.scale_width = (int)obs_data_get_int(settings, "scale_width");
 	config.scale_height = (int)obs_data_get_int(settings, "scale_height");
 	config.width  = (int)obs_output_get_width(output->output);
 	config.height = (int)obs_output_get_height(output->output);
-	config.format = obs_to_ffmpeg_video_format(
-			video_output_get_format(video));
+	config.format = AV_PIX_FMT_YUV420P;
 
 	if (format_is_yuv(voi->format)) {
 		config.color_range = voi->range == VIDEO_RANGE_FULL ?
@@ -1080,8 +1070,6 @@ static bool try_connect(struct ffmpeg_output *output)
 	ftl_set_authetication_key(output->stream_config, 2, "1234561abcde");
 
 	int video_ssrc = 1;
-	int video_width = 1280;
-	int video_height = 720;
 
 	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, video_ssrc, config.scale_width, config.scale_height);
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
