@@ -443,10 +443,10 @@ static inline bool open_output_file(struct ffmpeg_data *data)
 	if (av_dict_count(dict) > 0) {
 		struct dstr str = {0};
 
-	AVDictionaryEntry *entry = NULL;
-	while ((entry = av_dict_get(dict, "", entry,
-						AV_DICT_IGNORE_SUFFIX)))
+		AVDictionaryEntry *entry = NULL;
+		while ((entry = av_dict_get(audio_dict, "", entry, AV_DICT_IGNORE_SUFFIX))) {
 			dstr_catf(&str, "\n\t%s=%s", entry->key, entry->value);
+		}
 
 		blog(LOG_INFO, "Using audio muxer settings:%s", str.array);
 		dstr_free(&str);
@@ -1028,8 +1028,8 @@ static bool try_connect(struct ffmpeg_output *output)
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
 			"format_mime_type");
-	config.audio_muxer_settings = obs_data_get_string(settings, "audio_muxer_settings");
-	config.muxer_settings = obs_data_get_string(settings, "muxer_settings");
+	config.audio_muxer_settings = "ssrc=2 payload_type=97";
+	config.muxer_settings = "ssrc=1";
 	config.video_bitrate = (int)obs_data_get_int(settings, "video_bitrate");
 	config.audio_bitrate = (int)obs_data_get_int(settings, "audio_bitrate");
 	config.scale_width = (int)obs_data_get_int(settings, "scale_width");

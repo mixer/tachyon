@@ -265,7 +265,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->warnBeforeStreamStart,CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStop, CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->advOutFFURL,          EDIT_CHANGED,   OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFFMCfg,         EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFVBitrate,     SCROLL_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFUseRescale,   CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFRescale,      CBEDIT_CHANGED, OUTPUTS_CHANGED);
@@ -274,7 +273,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->advOutFFTrack2,       CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFTrack3,       CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFTrack4,       CHECK_CHANGED,  OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFFAMuxer,			 EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack1Bitrate,  COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack1Name,     EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutTrack2Bitrate,  COMBO_CHANGED,  OUTPUTS_CHANGED);
@@ -932,8 +930,6 @@ static void SelectEncoder(QComboBox *combo, const char *name, int id)
 void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 {
 	const char *url = config_get_string(main->Config(), "AdvOut", "FFURL");
-	const char *muxCustom = config_get_string(main->Config(), "AdvOut",
-			"FFMCustom");
 	int videoBitrate = config_get_int(main->Config(), "AdvOut",
 			"FFVBitrate");
 	bool rescale = config_get_bool(main->Config(), "AdvOut",
@@ -944,16 +940,13 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 			"FFABitrate");
 	int audioTrack = config_get_int(main->Config(), "AdvOut",
 			"FFAudioTrack");
-	const char *aAMuxer = config_get_string(main->Config(), "AdvOut", "FFAMuxer");
 
 	ui->advOutFFURL->setText(QT_UTF8(url));
-	ui->advOutFFMCfg->setText(muxCustom);
 	ui->advOutFFVBitrate->setValue(videoBitrate);
 	ui->advOutFFUseRescale->setChecked(rescale);
 	ui->advOutFFRescale->setEnabled(rescale);
 	ui->advOutFFRescale->setCurrentText(rescaleRes);
 	ui->advOutFFABitrate->setValue(audioBitrate);
-	ui->advOutFFAMuxer->setText(aAMuxer);
 
 	switch (audioTrack) {
 	case 1: ui->advOutFFTrack1->setChecked(true); break;
@@ -1037,7 +1030,6 @@ void OBSBasicSettings::SetAdvOutputFFmpegEnablement(
 		break;
 	case FF_CODEC_AUDIO:
 		ui->advOutFFABitrate->setEnabled(enabled);
-		ui->advOutFFAMuxer->setEnabled(enabled);
 		ui->advOutFFTrack1->setEnabled(enabled);
 		ui->advOutFFTrack2->setEnabled(enabled);
 		ui->advOutFFTrack3->setEnabled(enabled);
@@ -1827,12 +1819,10 @@ void OBSBasicSettings::SaveEncoder(QComboBox *combo, const char *section,
 void OBSBasicSettings::SaveOutputSettings()
 {
 	SaveEdit(ui->advOutFFURL, "AdvOut", "FFURL");
-	SaveEdit(ui->advOutFFMCfg, "AdvOut", "FFMCustom");
 	SaveSpinBox(ui->advOutFFVBitrate, "AdvOut", "FFVBitrate");
 	SaveCheckBox(ui->advOutFFUseRescale, "AdvOut", "FFRescale");
 	SaveCombo(ui->advOutFFRescale, "AdvOut", "FFRescaleRes");
 	SaveSpinBox(ui->advOutFFABitrate, "AdvOut", "FFABitrate");
-	SaveEdit(ui->advOutFFAMuxer, "AdvOut", "FFAMuxer");
 	SaveTrackIndex(main->Config(), "AdvOut", "FFAudioTrack",
 			ui->advOutFFTrack1, ui->advOutFFTrack2,
 			ui->advOutFFTrack3, ui->advOutFFTrack4);
