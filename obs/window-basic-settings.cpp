@@ -311,6 +311,12 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->reconnectRetryDelay,  SCROLL_CHANGED, ADV_CHANGED);
 	HookWidget(ui->reconnectMaxRetries,  SCROLL_CHANGED, ADV_CHANGED);
 
+	// FTL hooks
+	HookWidget(ui->advOutFTLChannelId,   SCROLL_CHANGED, OUTPUTS_CHANGED);
+	HookWidget(ui->advOutFTLStreamKey,	 EDIT_CHANGED,   OUTPUTS_CHANGED);
+	HookWidget(ui->advOutFTLAudioSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
+	HookWidget(ui->advOutFTLVideoSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
+
 #ifdef _WIN32
 	uint32_t winVer = GetWindowsVersion();
 	if (winVer > 0 && winVer < 0x602) {
@@ -941,12 +947,27 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	int audioTrack = config_get_int(main->Config(), "AdvOut",
 			"FFAudioTrack");
 
+	int ftlChannelId = config_get_int(main->Config(), "AdvOut",
+			"FTLChannelID");
+	const char *ftlStreamKey = config_get_string(main->Config(), "AdvOut",
+			"FTLStreamKey");
+	int ftlAudioSSRC = config_get_int(main->Config(), "AdvOut",
+			"FTLAudioSSRC");
+	int ftlVideoSSRC = config_get_int(main->Config(), "AdvOut",
+			"FTLVideoSSRC");
+
 	ui->advOutFFURL->setText(QT_UTF8(url));
 	ui->advOutFFVBitrate->setValue(videoBitrate);
 	ui->advOutFFUseRescale->setChecked(rescale);
 	ui->advOutFFRescale->setEnabled(rescale);
 	ui->advOutFFRescale->setCurrentText(rescaleRes);
 	ui->advOutFFABitrate->setValue(audioBitrate);
+
+	/* Load FTL UI bits */
+	ui->advOutFTLChannelId->setValue(ftlChannelId);
+	ui->advOutFTLStreamKey->setText(QT_UTF8(ftlStreamKey));
+	ui->advOutFTLAudioSSRC->setValue(ftlAudioSSRC);
+	ui->advOutFTLVideoSSRC->setValue(ftlVideoSSRC);
 
 	switch (audioTrack) {
 	case 1: ui->advOutFFTrack1->setChecked(true); break;
@@ -1835,6 +1856,12 @@ void OBSBasicSettings::SaveOutputSettings()
 	SaveEdit(ui->advOutTrack2Name, "AdvOut", "Track2Name");
 	SaveEdit(ui->advOutTrack3Name, "AdvOut", "Track3Name");
 	SaveEdit(ui->advOutTrack4Name, "AdvOut", "Track4Name");
+
+	/* Save FTL data */
+	SaveSpinBox(ui->advOutFTLChannelId, "AdvOut", "FTLChannelID");
+	SaveEdit(ui->advOutFTLStreamKey, "AdvOut", "FTLStreamKey");
+	SaveSpinBox(ui->advOutFTLAudioSSRC, "AdvOut", "FTLAudioSSRC");
+	SaveSpinBox(ui->advOutFTLVideoSSRC, "AdvOut", "FTLVideoSSRC");
 
 	WriteJsonData(streamEncoderProps, "streamEncoder.json");
 	WriteJsonData(recordEncoderProps, "recordEncoder.json");
