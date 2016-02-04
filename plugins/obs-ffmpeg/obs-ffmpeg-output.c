@@ -1149,6 +1149,7 @@ static void ffmpeg_output_stop(void *data)
 	if (output->stream_config) {
 		ftl_deactivate_stream(output->stream_config);
 		ftl_destory_stream(&(output->stream_config));
+		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
 	}
 }
 
