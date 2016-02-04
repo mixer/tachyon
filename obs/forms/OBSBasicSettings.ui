@@ -345,34 +345,14 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="4" column="0">
-                      <widget class="QLabel" name="label_37">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.VEncoder</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="1">
-                      <widget class="QComboBox" name="advOutFFVEncoder"/>
-                     </item>
-                     <item row="6" column="0">
-                      <widget class="QLabel" name="label_38">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.VEncoderSettings</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="1">
-                      <widget class="QLineEdit" name="advOutFFVCfg"/>
-                     </item>
-                     <item row="7" column="0">
+                     <item row="5" column="0">
                       <widget class="QLabel" name="label_41">
                        <property name="text">
                         <string>Basic.Settings.Output.AudioBitrate</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="7" column="1">
+                     <item row="5" column="1">
                       <widget class="QSpinBox" name="advOutFFABitrate">
                        <property name="minimum">
                         <number>32</number>
@@ -388,14 +368,14 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="0">
+                     <item row="6" column="0">
                       <widget class="QLabel" name="label_47">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.AudioTrack</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="1">
+                     <item row="6" column="1">
                       <widget class="QWidget" name="widget_10" native="true">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -450,35 +430,15 @@
                        </layout>
                       </widget>
                      </item>
-                     <item row="9" column="0">
+                     <item row="7" column="0">
                       <widget class="QLabel" name="label_7">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.FFmpeg.AMuxerSettings</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="9" column="1">
+                     <item row="7" column="1">
                       <widget class="QLineEdit" name="advOutFFAMuxer"/>
-                     </item>
-                     <item row="11" column="0">
-                      <widget class="QLabel" name="label_39">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.AEncoder</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="11" column="1">
-                      <widget class="QComboBox" name="advOutFFAEncoder"/>
-                     </item>
-                     <item row="12" column="0">
-                      <widget class="QLabel" name="label_46">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.AEncoderSettings</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="12" column="1">
-                      <widget class="QLineEdit" name="advOutFFACfg"/>
                      </item>
                     </layout>
                    </widget>
@@ -1827,16 +1787,12 @@
   <tabstop>advOutFFVBitrate</tabstop>
   <tabstop>advOutFFUseRescale</tabstop>
   <tabstop>advOutFFRescale</tabstop>
-  <tabstop>advOutFFVEncoder</tabstop>
-  <tabstop>advOutFFVCfg</tabstop>
   <tabstop>advOutFFABitrate</tabstop>
   <tabstop>advOutFFTrack1</tabstop>
   <tabstop>advOutFFTrack2</tabstop>
   <tabstop>advOutFFTrack3</tabstop>
   <tabstop>advOutFFTrack4</tabstop>
   <tabstop>advOutFFAMuxer</tabstop>
-  <tabstop>advOutFFAEncoder</tabstop>
-  <tabstop>advOutFFACfg</tabstop>
   <tabstop>advOutTrack1Bitrate</tabstop>
   <tabstop>advOutTrack1Name</tabstop>
   <tabstop>advOutTrack2Bitrate</tabstop>
