@@ -9,6 +9,9 @@ find_package(FFmpeg REQUIRED
 	COMPONENTS avcodec avfilter avdevice avutil swscale avformat swresample)
 include_directories(${FFMPEG_INCLUDE_DIRS})
 
+find_package(FTLSDK REQUIRED)
+include_directories(${FTLSDK_INCLUDE_DIRS})
+
 set(obs-ffmpeg_HEADERS
 	obs-ffmpeg-formats.h
 	obs-ffmpeg-compat.h
@@ -27,7 +30,8 @@ target_link_libraries(obs-ffmpeg
 	libobs
 	libff
 	${obs-ffmpeg_PLATFORM_DEPS}
-	${FFMPEG_LIBRARIES})
+	${FFMPEG_LIBRARIES}
+	${FTLSDK_LIBRARIES})
 
 install_obs_plugin_with_data(obs-ffmpeg data)
 
