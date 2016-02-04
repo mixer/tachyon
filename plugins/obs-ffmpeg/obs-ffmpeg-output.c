@@ -26,6 +26,8 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
+#include <ftl/ftl.h>
+
 #include "obs-ffmpeg-formats.h"
 #include "closest-pixel-format.h"
 #include "obs-ffmpeg-compat.h"
@@ -87,8 +89,8 @@ struct ffmpeg_output {
 	obs_output_t       *output;
 	volatile bool      active;
 	struct ffmpeg_data ff_data;
-
 	bool               connecting;
+
 	pthread_t          start_thread;
 
 	bool               write_thread_active;
@@ -99,6 +101,11 @@ struct ffmpeg_output {
 
 	DARRAY(AVPacket)   packets_video;
 	DARRAY(AVPacket)   packets_audio;
+
+	ftl_stream_configuration_t* stream_config;
+	ftl_stream_video_component_t* video_component;
+	ftl_stream_audio_component_t* audio_component;
+
 };
 
 /* ------------------------------------------------------------------------- */
@@ -578,16 +585,10 @@ static bool ffmpeg_data_init(struct ffmpeg_data *data,
 
 	is_rtmp = (astrcmpi_n(config->url, "rtmp://", 7) == 0);
 
-	AVOutputFormat *output_format = av_guess_format(
-			is_rtmp ? "flv" : data->config.format_name,
-			data->config.url,
-			is_rtmp ? NULL : data->config.format_mime_type);
+	AVOutputFormat *output_format = av_guess_format("rtp", NULL, NULL);
 
 	/* Do it twice because avformat_alloc requires it */
-	AVOutputFormat *output_format2 = av_guess_format(
-			is_rtmp ? "flv" : data->config.format_name,
-			data->config.url,
-			is_rtmp ? NULL : data->config.format_mime_type);
+	AVOutputFormat *output_format2 = av_guess_format("rtp", NULL, NULL);
 
 
 	if (output_format == NULL) {
@@ -1020,6 +1021,7 @@ static bool try_connect(struct ffmpeg_output *output)
 	struct ffmpeg_cfg config;
 	obs_data_t *settings;
 	bool success;
+	ftl_status_t status_code;
 	int ret;
 
 	settings = obs_output_get_settings(output->output);
@@ -1065,6 +1067,33 @@ static bool try_connect(struct ffmpeg_output *output)
 		config.scale_width = config.width;
 	if (!config.scale_height)
 		config.scale_height = config.height;
+
+	/* Use Charon to autheticate and configure muxer settings */
+	ftl_init();
+	status_code = ftl_create_stream_configuration(&(output->stream_config));
+	if (status_code != FTL_SUCCESS) {
+     blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
+     return false;
+   }
+
+	ftl_set_ingest_location(output->stream_config, "127.0.0.1");
+	ftl_set_authetication_key(output->stream_config, 2, "1234561abcde");
+
+	int video_ssrc = 1;
+	int video_width = 1280;
+	int video_height = 720;
+
+	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, video_ssrc, config.scale_width, config.scale_height);
+	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
+
+	int audio_ssrc = 2;
+	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, audio_ssrc);
+	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
+
+	if (ftl_activate_stream(output->stream_config)  != FTL_SUCCESS) {
+		blog(LOG_ERROR, "Failed to initialize FTL Stream");
+		return false;
+	}
 
 	success = ffmpeg_data_init(&output->ff_data, &config);
 	obs_data_release(settings);
@@ -1127,6 +1156,11 @@ static void ffmpeg_output_stop(void *data)
 	if (output->active) {
 		obs_output_end_data_capture(output->output);
 		ffmpeg_deactivate(output);
+	}
+
+	if (output->stream_config) {
+		ftl_deactivate_stream(output->stream_config);
+		ftl_destory_stream(&(output->stream_config));
 	}
 }
 
