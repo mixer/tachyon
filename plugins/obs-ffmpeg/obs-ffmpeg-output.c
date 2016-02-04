@@ -36,8 +36,8 @@ struct ffmpeg_cfg {
 	const char         *url;
 	const char         *format_name;
 	const char         *format_mime_type;
-	const char				 *audio_muxer_settings;
-	const char         *muxer_settings;
+	char				 			 audio_muxer_settings[2048];
+	char         			 muxer_settings[2048];
 	int                video_bitrate;
 	int                audio_bitrate;
 	const char         *video_encoder;
@@ -53,6 +53,12 @@ struct ffmpeg_cfg {
 	int                scale_height;
 	int                width;
 	int                height;
+
+	/* FTL specific fields */
+	uint32_t					channel_id;
+	const char				*stream_key;
+	uint32_t					audio_ssrc;
+	uint32_t					video_ssrc;
 };
 
 struct ffmpeg_data {
@@ -1028,8 +1034,6 @@ static bool try_connect(struct ffmpeg_output *output)
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
 			"format_mime_type");
-	config.audio_muxer_settings = "ssrc=2 payload_type=97";
-	config.muxer_settings = "ssrc=1";
 	config.video_bitrate = (int)obs_data_get_int(settings, "video_bitrate");
 	config.audio_bitrate = (int)obs_data_get_int(settings, "audio_bitrate");
 	config.scale_width = (int)obs_data_get_int(settings, "scale_width");
@@ -1037,6 +1041,26 @@ static bool try_connect(struct ffmpeg_output *output)
 	config.width  = (int)obs_output_get_width(output->output);
 	config.height = (int)obs_output_get_height(output->output);
 	config.format = AV_PIX_FMT_YUV420P;
+
+	/* Load in FTL specific settings */
+	config.channel_id = (uint32_t)obs_data_get_int(settings, "ftl_channel_id");
+	config.stream_key = get_string_or_null(settings, "ftl_stream_key");
+	config.audio_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_audio_ssrc");
+	config.video_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_video_ssrc");
+
+	/* snprintf out the muxer settings */
+	int size = 0;
+	size = snprintf(config.muxer_settings, 2048, "ssrc=%u", config.video_ssrc);
+	if (size == 2048) {
+		blog(LOG_WARNING, "snprintf failed on muxer settings!");
+		return false;
+	}
+
+	size = snprintf(config.audio_muxer_settings, 2048, "ssrc=%u payload_type=97", config.audio_ssrc);
+	if (size == 2048) {
+		blog(LOG_WARNING, "snprintf failed on muxer settings!");
+		return false;
+	}
 
 	if (format_is_yuv(voi->format)) {
 		config.color_range = voi->range == VIDEO_RANGE_FULL ?
@@ -1067,15 +1091,12 @@ static bool try_connect(struct ffmpeg_output *output)
    }
 
 	ftl_set_ingest_location(output->stream_config, "127.0.0.1");
-	ftl_set_authetication_key(output->stream_config, 2, "1234561abcde");
+	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
-	int video_ssrc = 1;
-
-	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, video_ssrc, config.scale_width, config.scale_height);
+	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
-	int audio_ssrc = 2;
-	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, audio_ssrc);
+	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
 	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
 
 	if (ftl_activate_stream(output->stream_config)  != FTL_SUCCESS) {

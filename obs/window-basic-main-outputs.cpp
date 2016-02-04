@@ -789,6 +789,16 @@ inline void AdvancedOutput::SetupFFmpeg()
 			"FFACustom");
 	const char *aMuxCustom = config_get_string(main->Config(), "AdvOut",
 			"FFAMuxer");
+
+	int ftlChannelId = config_get_int(main->Config(), "AdvOut",
+			"FTLChannelID");
+	const char *ftlStreamKey = config_get_string(main->Config(), "AdvOut",
+			"FTLStreamKey");
+	int ftlAudioSSRC = config_get_int(main->Config(), "AdvOut",
+			"FTLAudioSSRC");
+	int ftlVideoSSRC = config_get_int(main->Config(), "AdvOut",
+			"FTLVideoSSRC");
+
 	obs_data_t *settings = obs_data_create();
 
 	obs_data_set_string(settings, "url", url);
@@ -804,7 +814,11 @@ inline void AdvancedOutput::SetupFFmpeg()
 	obs_data_set_string(settings, "audio_encoder", aEncoder);
 	obs_data_set_int(settings, "audio_encoder_id", aEncoderId);
 	obs_data_set_string(settings, "audio_settings", aEncCustom);
-
+	obs_data_set_int(settings, "ftl_channel_id", ftlChannelId);
+	obs_data_set_string(settings, "ftl_stream_key", ftlStreamKey);
+	obs_data_set_int(settings, "ftl_audio_ssrc", ftlAudioSSRC);
+	obs_data_set_int(settings, "ftl_video_ssrc", ftlVideoSSRC);
+	
 	if (rescale && rescaleRes && *rescaleRes) {
 		int width;
 		int height;
