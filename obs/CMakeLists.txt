@@ -47,15 +47,15 @@ include_directories(${LIBCURL_INCLUDE_DIRS})
 add_definitions(${LIBCURL_DEFINITIONS})
 
 if(WIN32)
-	set(obs_PLATFORM_SOURCES
+	set(tachyon_PLATFORM_SOURCES
 		platform-windows.cpp
 		obs.rc)
 elseif(APPLE)
-	set(obs_PLATFORM_SOURCES
+	set(tachyon_PLATFORM_SOURCES
 		platform-osx.mm)
 
 	find_package(AppKit REQUIRED)
-	set(obs_PLATFORM_LIBRARIES ${APPKIT_LIBRARIES})
+	set(tachyon_PLATFORM_LIBRARIES ${APPKIT_LIBRARIES})
 
 	add_definitions(-fobjc-arc)
 
@@ -63,11 +63,11 @@ elseif(APPLE)
 	if(ENABLE_SPARKLE_UPDATER)
 		find_library(SPARKLE Sparkle)
 		include_directories(${SPARKLE})
-		set(obs_PLATFORM_SOURCES
+		set(tachyon_PLATFORM_SOURCES
 			${obs_PLATFORM_SOURCES}
 			sparkle-updater.mm)
-		set(obs_PLATFORM_LIBRARIES
-			${obs_PLATFORM_LIBRARIES}
+		set(tachyon_PLATFORM_LIBRARIES
+			${tachyon_PLATFORM_LIBRARIES}
 			${SPARKLE})
 		add_definitions(-DUPDATE_SPARKLE=1)
 	endif()
@@ -75,7 +75,7 @@ elseif(APPLE)
 elseif(UNIX)
         find_package(Qt5X11Extras REQUIRED)
 
-	set(obs_PLATFORM_SOURCES
+	set(tachyon_PLATFORM_SOURCES
 		platform-x11.cpp)
 
 	find_package(XCB COMPONENTS XCB REQUIRED RANDR REQUIRED XINERAMA REQUIRED)
@@ -88,14 +88,14 @@ elseif(UNIX)
 		${XCB_DEFINITIONS}
 		${X11_XCB_DEFINITIONS})
 
-	set(obs_PLATFORM_LIBRARIES
+	set(tachyon_PLATFORM_LIBRARIES
 		${XCB_LIBRARIES}
 		${X11_XCB_LIBRARIES}
                 Qt5::X11Extras)
 endif()
 
-set(obs_SOURCES
-	${obs_PLATFORM_SOURCES}
+set(tachyon_SOURCES
+	${tachyon_PLATFORM_SOURCES}
 	obs-app.cpp
 	window-basic-main.cpp
 	window-basic-filters.cpp
@@ -136,7 +136,7 @@ set(obs_SOURCES
 	audio-encoders.cpp
 	qt-wrappers.cpp)
 
-set(obs_HEADERS
+set(tachyon_HEADERS
 	obs-app.hpp
 	platform.hpp
 	window-main.hpp
@@ -179,7 +179,7 @@ set(obs_HEADERS
 	audio-encoders.hpp
 	qt-wrappers.hpp)
 
-set(obs_UI
+set(tachyon_UI
 	forms/NameDialog.ui
 	forms/OBSLicenseAgreement.ui
 	forms/OBSLogReply.ui
@@ -191,17 +191,17 @@ set(obs_UI
 	forms/OBSBasicInteraction.ui
 	forms/OBSRemux.ui)
 
-set(obs_QRC
+set(tachyon_QRC
 	forms/obs.qrc)
 
-qt5_wrap_ui(obs_UI_HEADERS ${obs_UI})
-qt5_add_resources(obs_QRC_SOURCES ${obs_QRC})
+qt5_wrap_ui(tachyon_UI_HEADERS ${tachyon_UI})
+qt5_add_resources(tachon_QRC_SOURCES ${tachyon_QRC})
 
-add_executable(obs WIN32
-	${obs_SOURCES}
-	${obs_HEADERS}
-	${obs_UI_HEADERS}
-	${obs_QRC_SOURCES})
+add_executable(tachyon WIN32
+	${tachyon_SOURCES}
+	${tachyon_HEADERS}
+	${tachyon_UI_HEADERS}
+	${tachyon_QRC_SOURCES})
 
 if(WIN32)
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -210,25 +210,25 @@ if(WIN32)
 		set(_output_suffix "32")
 	endif()
 
-	set_target_properties(obs
+	set_target_properties(tachyon
 		PROPERTIES
-			OUTPUT_NAME "obs${_output_suffix}")
+			OUTPUT_NAME "tachyon${_output_suffix}")
 endif()
 
-target_link_libraries(obs
+target_link_libraries(tachyon
 	libobs
 	libff
 	Qt5::Widgets
 	${LIBCURL_LIBRARIES}
-	${obs_PLATFORM_LIBRARIES})
+	${tachyon_PLATFORM_LIBRARIES})
 
-define_graphic_modules(obs)
+define_graphic_modules(tachyon)
 
-install_obs_core(obs)
-install_obs_data(obs data obs-studio)
+install_obs_core(tachyon)
+install_obs_data(tachyon data obs-studio)
 
 if (UNIX AND UNIX_STRUCTURE AND NOT APPLE)
-	install(FILES dist/obs.desktop DESTINATION share/applications)
-	install(FILES forms/images/obs.png
+	install(FILES dist/tachyon.desktop DESTINATION share/applications)
+	install(FILES forms/images/tachyon.png
 		DESTINATION share/icons/hicolor/256x256/apps)
 endif()

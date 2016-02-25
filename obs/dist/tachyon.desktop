@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
-Name=OBS
+Name=Tachyon Streaming Studio
 GenericName=Streaming/Recording Software
-Comment=Free and Open Source Streaming/Recording Software
+Comment=Free and Open Source Streaming/Recording Software for the FTL Streaming Protocol
 Exec=obs
 Icon=obs
 Terminal=false
