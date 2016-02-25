@@ -195,7 +195,7 @@ set(tachyon_QRC
 	forms/obs.qrc)
 
 qt5_wrap_ui(tachyon_UI_HEADERS ${tachyon_UI})
-qt5_add_resources(tachon_QRC_SOURCES ${tachyon_QRC})
+qt5_add_resources(tachyon_QRC_SOURCES ${tachyon_QRC})
 
 add_executable(tachyon WIN32
 	${tachyon_SOURCES}
