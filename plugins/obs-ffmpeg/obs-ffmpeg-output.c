@@ -117,6 +117,11 @@ struct ffmpeg_output {
 
 /* ------------------------------------------------------------------------- */
 
+void log_libftl_messages(ftl_log_severity_t log_level, const char * message) {
+	UNUSED_PARAMETER(log_level);
+  blog(LOG_WARNING, "[libftl] %s", message);
+}
+
 static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
 		AVCodec **codec, enum AVCodecID id, int audio)
 {
@@ -1020,7 +1025,7 @@ static inline const char *get_string_or_null(obs_data_t *settings,
 	return value;
 }
 
-static bool try_connect(struct ffmpeg_output *output)
+static int try_connect(struct ffmpeg_output *output)
 {
 	video_t *video = obs_output_video(output->output);
 	const struct video_output_info *voi = video_output_get_info(video);
@@ -1054,30 +1059,30 @@ static bool try_connect(struct ffmpeg_output *output)
 	size = snprintf(config.muxer_settings, 2048, "ssrc=%u", config.video_ssrc);
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on muxer settings!");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	size = snprintf(config.audio_muxer_settings, 2048, "ssrc=%u payload_type=97", config.audio_ssrc);
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on muxer settings!");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	/* Build the RTP command line */
 	if (config.ingest_location == NULL) {
 		blog(LOG_WARNING, "ingest location blank");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	if (config.stream_key == NULL) {
 		blog(LOG_WARNING, "stream key incorrect");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1420", config.ingest_location);
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	if (format_is_yuv(voi->format)) {
@@ -1092,7 +1097,7 @@ static bool try_connect(struct ffmpeg_output *output)
 
 	if (config.format == AV_PIX_FMT_NONE) {
 		blog(LOG_DEBUG, "invalid pixel format used for FFmpeg output");
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	if (!config.scale_width)
@@ -1102,10 +1107,12 @@ static bool try_connect(struct ffmpeg_output *output)
 
 	/* Use Charon to autheticate and configure muxer settings */
 	ftl_init();
+	ftl_register_log_handler(log_libftl_messages);
+
 	status_code = ftl_create_stream_configuration(&(output->stream_config));
 	if (status_code != FTL_SUCCESS) {
      blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
-     return false;
+     return OBS_OUTPUT_ERROR;
    }
 
 	ftl_set_ingest_location(output->stream_config, config.ingest_location);
@@ -1117,16 +1124,55 @@ static bool try_connect(struct ffmpeg_output *output)
 	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
 	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
 
-	if (ftl_activate_stream(output->stream_config)  != FTL_SUCCESS) {
+	ftl_status_t activation_status;
+	int ftl_to_obs_error_code = 0;
+
+	activation_status = ftl_activate_stream(output->stream_config);
+
+	/* Map FTL errors to OBS errors */
+	switch (activation_status) {
+		case FTL_SUCCESS:
+			break;
+		case FTL_DNS_FAILURE:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_DNS_FAILURE;
+			break;
+		case FTL_CONNECT_ERROR:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_CONNECT_FAILURE;
+			break;
+		case FTL_OLD_VERSION:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_OLD_VERSION;
+			break;
+		case FTL_STREAM_REJECTED:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_STREAM_REJECTED;
+			break;
+		case FTL_UNAUTHORIZED:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_UNAUTHORIZED;
+			break;
+		case FTL_AUDIO_SSRC_COLLISION:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_AUDIO_SSRC_COLLISION;
+			break;
+		case FTL_VIDEO_SSRC_COLLISION:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_VIDEO_SSRC_COLLISION;
+			break;
+		/* Non-specific failures, or internal Tachyon bug */
+		default:
+			/* Unknown FTL error */
+			blog (LOG_ERROR, "tachyon error mapping needs to be updated!");
+			ftl_to_obs_error_code = OBS_OUTPUT_ERROR;
+	}
+
+	if (activation_status != FTL_SUCCESS) {
 		blog(LOG_ERROR, "Failed to initialize FTL Stream");
-		return false;
+		ftl_destory_stream(&(output->stream_config));
+		output->stream_config = 0;
+		return ftl_to_obs_error_code;
 	}
 
 	success = ffmpeg_data_init(&output->ff_data, &config);
 	obs_data_release(settings);
 
 	if (!success)
-		return false;
+		return OBS_OUTPUT_ERROR;
 
 	struct audio_convert_info aci = {
 		.format = output->ff_data.audio_format
@@ -1135,30 +1181,32 @@ static bool try_connect(struct ffmpeg_output *output)
 	output->active = true;
 
 	if (!obs_output_can_begin_data_capture(output->output, 0))
-		return false;
+		return OBS_OUTPUT_ERROR;
 
 	ret = pthread_create(&output->write_thread, NULL, write_thread, output);
 	if (ret != 0) {
 		blog(LOG_WARNING, "ffmpeg_output_start: failed to create write "
 		                  "thread.");
 		ffmpeg_output_stop(output);
-		return false;
+		return OBS_OUTPUT_ERROR;
 	}
 
 	obs_output_set_video_conversion(output->output, NULL);
 	obs_output_set_audio_conversion(output->output, &aci);
 	obs_output_begin_data_capture(output->output, 0);
 	output->write_thread_active = true;
-	return true;
+	return OBS_OUTPUT_SUCCESS;
 }
 
 static void *start_thread(void *data)
 {
 	struct ffmpeg_output *output = data;
 
-	if (!try_connect(output))
+	int error_code = try_connect(output);
+
+	if (error_code != OBS_OUTPUT_SUCCESS)
 		obs_output_signal_stop(output->output,
-				OBS_OUTPUT_CONNECT_FAILED);
+				error_code);
 
 	output->connecting = false;
 	return NULL;

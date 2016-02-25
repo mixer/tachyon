@@ -3396,6 +3396,42 @@ void OBSBasic::RecordingStop(int code)
 				QTStr("Output.RecordNoSpace.Title"),
 				QTStr("Output.RecordNoSpace.Msg"));
 
+	/* Handle FTL specific errors */
+	} else if (code == OBS_OUTPUT_FTL_DNS_FAILURE) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLDNSFailure.Title"),
+				QTStr("Output.FTLDNSFailure.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_CONNECT_FAILURE) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLConnectFailure.Title"),
+				QTStr("Output.FTLConnectFailure.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_OLD_VERSION) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLOldVersion.Title"),
+				QTStr("Output.FTLOldVersion.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_STREAM_REJECTED) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLStreamRejected.Title"),
+				QTStr("Output.FTLStreamRejected.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_UNAUTHORIZED) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLUnauthorized.Title"),
+				QTStr("Output.FTLUnauthorized.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_AUDIO_SSRC_COLLISION) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLAudioSSRCCollision.Title"),
+				QTStr("Output.FTLAudioSSRCCollision.Msg"));
+
+	} else if (code == OBS_OUTPUT_FTL_VIDEO_SSRC_COLLISION) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLVideoSSRCCollision.Title"),
+				QTStr("Output.FTLVideoSSRCCollision.Msg"));
+
 	} else if (code != OBS_OUTPUT_SUCCESS) {
 		QMessageBox::information(this,
 				QTStr("Output.RecordError.Title"),
