@@ -3980,7 +3980,7 @@ void OBSBasic::UpdateTitleBar()
 	const char *sceneCollection = config_get_string(App()->GlobalConfig(),
 			"Basic", "SceneCollection");
 
-	name << "OBS ";
+	name << "Tachyon ";
 	if (previewProgramMode)
 		name << "Studio ";
 
