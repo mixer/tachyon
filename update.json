@@ -1,0 +1,21 @@
+{
+	"windows": {
+		"major": 0,
+		"minor": 20160229,
+		"patch": 0,
+		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/20160229"
+	},
+	"mac": {
+		"major": 0,
+		"minor": 12,
+		"patch": 0,
+		"download": "https://github.com/jp9000/obs-studio/releases/download/0.12.0/obs-0.12.0-installer.dmg"
+	},
+	"other": {
+		"major": 0,
+		"minor": 4,
+		"patch": 0,
+		"download": "http://obsproject.com"
+	},
+	"description": "First Release of Tachyon to the general public"
+}
