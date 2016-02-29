@@ -24,6 +24,12 @@
  * information.
  */
 
+/* Tachyon build number */
+#define TACHYON_BUILD_YEAR  2016
+#define TACHYON_BUILD_MONTH 2
+#define TACHYON_BUILD_DAY   28
+#define TACHYON_PATCH       0
+
 /*
  * Increment if major breaking API changes
  */
@@ -48,10 +54,22 @@
                               (minor << 16) | \
                                patch        )
 
+#define MAKE_TACHYON_VERSION(year, month, day, patch) \
+                             ((year << 24) | \
+                              (month << 16) | \
+                               day << 8   | \
+                               patch       )
+
 #define LIBOBS_API_VER \
 	MAKE_SEMANTIC_VERSION(LIBOBS_API_MAJOR_VER, \
                               LIBOBS_API_MINOR_VER, \
                               LIBOBS_API_PATCH_VER)
+
+#define TACHYON_VER \
+    MAKE_TACHYON_VERSION(TACHYON_BUILD_YEAR, \
+                              TACHYON_BUILD_MONTH, \
+                              TACHYON_BUILD_DAY,   \
+                              TACHYON_PATCH)
 
 #ifdef HAVE_OBSCONFIG_H
 # include "obsconfig.h"

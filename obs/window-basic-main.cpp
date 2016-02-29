@@ -748,6 +748,10 @@ bool OBSBasic::InitBasicConfigDefaults()
 	config_set_default_uint  (basicConfig, "Output", "RetryDelay", 10);
 	config_set_default_uint  (basicConfig, "Output", "MaxRetries", 20);
 
+	// FTL settings
+	config_set_default_uint(basicConfig, "AdvOut", "FTLAudioSSRC", 1);
+	config_set_default_uint(basicConfig, "AdvOut", "FTLVideoSSRC", 2);
+
 	int i = 0;
 	uint32_t scale_cx = cx;
 	uint32_t scale_cy = cy;
@@ -770,7 +774,7 @@ bool OBSBasic::InitBasicConfigDefaults()
 	config_set_default_uint  (basicConfig, "Video", "FPSDen", 1);
 	config_set_default_string(basicConfig, "Video", "ScaleType", "bicubic");
 //	config_set_default_string(basicConfig, "Video", "ColorFormat", "NV12");
-config_set_default_string(basicConfig, "Video", "ColorFormat", "I420");
+	config_set_default_string(basicConfig, "Video", "ColorFormat", "I420");
 	config_set_default_string(basicConfig, "Video", "ColorSpace", "601");
 	config_set_default_string(basicConfig, "Video", "ColorRange",
 			"Partial");
@@ -1763,7 +1767,7 @@ void OBSBasic::CheckForUpdates()
 	}
 
 	RemoteTextThread *thread = new RemoteTextThread(
-			"https://obsproject.com/obs2_update/basic.json");
+			"https://raw.githubusercontent.com/WatchBeam/ftl-studio/ftl-ffmpeg/update.json");
 	updateCheckThread = thread;
 	connect(thread, &RemoteTextThread::Result,
 			this, &OBSBasic::updateFileFinished);
@@ -1795,22 +1799,25 @@ void OBSBasic::updateFileFinished(const QString &text, const QString &error)
 	const char *download    = obs_data_get_string(versionData, "download");
 
 	if (returnData && versionData && description && download) {
-		long major   = obs_data_get_int(versionData, "major");
-		long minor   = obs_data_get_int(versionData, "minor");
-		long patch   = obs_data_get_int(versionData, "patch");
-		long version = MAKE_SEMANTIC_VERSION(major, minor, patch);
+		long year  = obs_data_get_int(versionData, "year");
+		long month = obs_data_get_int(versionData, "month");
+		long date  = obs_data_get_int(versionData, "day");
+		long patch = obs_data_get_int(versionData, "patch");
+
+		long version = MAKE_TACHYON_VERSION(year, month, date, patch);
 
 		blog(LOG_INFO, "Update check: last known remote version "
 				"is %ld.%ld.%ld",
-				major, minor, patch);
+				year, month, date, patch);
 
-		if (version > LIBOBS_API_VER) {
+		if (version > TACHYON_VER) {
 			QString     str = QTStr("UpdateAvailable.Text");
 			QMessageBox messageBox(this);
 
-			str = str.arg(QString::number(major),
-			              QString::number(minor),
-			              QString::number(patch),
+			str = str.arg(QString::number(year),
+			              QString::number(month),
+						  QString::number(date),
+						  QString::number(patch),
 			              download);
 
 			messageBox.setWindowTitle(QTStr("UpdateAvailable"));
