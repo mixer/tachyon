@@ -284,6 +284,9 @@
                        <property name="alignment">
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                        </property>
+                       <property name="buddy">
+                        <cstring>advOutFFURL</cstring>
+                       </property>
                       </widget>
                      </item>
                      <item row="0" column="1">
@@ -293,6 +296,9 @@
                       <widget class="QLabel" name="label_40">
                        <property name="text">
                         <string>Basic.Settings.Output.VideoBitrate</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFFVBitrate</cstring>
                        </property>
                       </widget>
                      </item>
@@ -340,6 +346,9 @@
                        <property name="text">
                         <string>Basic.Settings.Output.AudioBitrate</string>
                        </property>
+                       <property name="buddy">
+                        <cstring>advOutFFABitrate</cstring>
+                       </property>
                       </widget>
                      </item>
                      <item row="8" column="1">
@@ -362,6 +371,9 @@
                       <widget class="QLabel" name="label_47">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.AudioTrack</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFFTrack1</cstring>
                        </property>
                       </widget>
                      </item>
@@ -425,6 +437,9 @@
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.FFmpeg.ChannelID</string>
                        </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLChannelId</cstring>
+                       </property>
                       </widget>
                      </item>
                      <item row="1" column="1">
@@ -439,6 +454,9 @@
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.FFmpeg.StreamKey</string>
                        </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLStreamKey</cstring>
+                       </property>
                       </widget>
                      </item>
                      <item row="2" column="1">
@@ -448,6 +466,9 @@
                       <widget class="QLabel" name="label_16">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.FFmpeg.AudioSSRC</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLAudioSSRC</cstring>
                        </property>
                       </widget>
                      </item>
@@ -465,6 +486,9 @@
                       <widget class="QLabel" name="label_18">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.FFmpeg.VideoSSRC</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLVideoSSRC</cstring>
                        </property>
                       </widget>
                      </item>
@@ -1113,8 +1137,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>62</width>
-              <height>16</height>
+              <width>98</width>
+              <height>28</height>
              </rect>
             </property>
            </widget>
@@ -1423,8 +1447,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>96</width>
-           <height>26</height>
+           <width>98</width>
+           <height>28</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="hotkeyLayout">
@@ -1470,8 +1494,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>530</width>
-              <height>492</height>
+              <width>664</width>
+              <height>541</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1818,17 +1842,17 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>language</tabstop>
-  <tabstop>advOutFFURL</tabstop>
-  <tabstop>theme</tabstop>
-  <tabstop>warnBeforeStreamStart</tabstop>
-  <tabstop>warnBeforeStreamStop</tabstop>
+  <tabstop>listWidget</tabstop>
   <tabstop>advOutTabs</tabstop>
+  <tabstop>advOutFFURL</tabstop>
+  <tabstop>advOutFTLChannelId</tabstop>
+  <tabstop>advOutFTLStreamKey</tabstop>
+  <tabstop>advOutFTLAudioSSRC</tabstop>
+  <tabstop>advOutFTLVideoSSRC</tabstop>
   <tabstop>advOutFFVBitrate</tabstop>
-  <tabstop>advOutFFUseRescale</tabstop>
   <tabstop>advOutFFRescale</tabstop>
   <tabstop>advOutFFABitrate</tabstop>
-  <tabstop>advOutFFTrack1</tabstop>
+  <tabstop>advOutFFUseRescale</tabstop>
   <tabstop>advOutFFTrack2</tabstop>
   <tabstop>advOutFFTrack3</tabstop>
   <tabstop>advOutFFTrack4</tabstop>
@@ -1870,7 +1894,11 @@
   <tabstop>reconnectEnable</tabstop>
   <tabstop>reconnectRetryDelay</tabstop>
   <tabstop>reconnectMaxRetries</tabstop>
-  <tabstop>listWidget</tabstop>
+  <tabstop>language</tabstop>
+  <tabstop>warnBeforeStreamStart</tabstop>
+  <tabstop>warnBeforeStreamStop</tabstop>
+  <tabstop>theme</tabstop>
+  <tabstop>advOutFFTrack1</tabstop>
  </tabstops>
  <resources>
   <include location="obs.qrc"/>
