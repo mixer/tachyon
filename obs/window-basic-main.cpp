@@ -1814,7 +1814,7 @@ void OBSBasic::updateFileFinished(const QString &text, const QString &error)
 		long version = MAKE_TACHYON_VERSION(year, month, date, patch);
 
 		blog(LOG_INFO, "Update check: last known remote version "
-				"is %ld.%ld.%ld",
+				"is %ld.%ld.%ld.%ld",
 				year, month, date, patch);
 
 		if (version > TACHYON_VER) {
