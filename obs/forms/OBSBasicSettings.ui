@@ -264,8 +264,8 @@
                      <property name="topMargin">
                       <number>0</number>
                      </property>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="label_36">
+                     <item row="2" column="0">
+                      <widget class="QLabel" name="advOutSavePathURLlabel">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                          <horstretch>0</horstretch>
@@ -289,10 +289,80 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="0" column="1">
+                     <item row="2" column="1">
                       <widget class="QLineEdit" name="advOutFFURL"/>
                      </item>
+                     <item row="3" column="0">
+                      <widget class="QLabel" name="label_7">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.ChannelID</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLChannelId</cstring>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QSpinBox" name="advOutFTLChannelId">
+                       <property name="maximum">
+                        <number>1000000</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="0">
+                      <widget class="QLabel" name="label_9">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.StreamKey</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLStreamKey</cstring>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1">
+                      <widget class="QLineEdit" name="advOutFTLStreamKey"/>
+                     </item>
                      <item row="5" column="0">
+                      <widget class="QLabel" name="label_16">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.AudioSSRC</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLAudioSSRC</cstring>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QSpinBox" name="advOutFTLAudioSSRC">
+                       <property name="maximum">
+                        <number>100000</number>
+                       </property>
+                       <property name="value">
+                        <number>1</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0">
+                      <widget class="QLabel" name="label_18">
+                       <property name="text">
+                        <string>Basic.Settings.Output.Adv.FFmpeg.VideoSSRC</string>
+                       </property>
+                       <property name="buddy">
+                        <cstring>advOutFTLVideoSSRC</cstring>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QSpinBox" name="advOutFTLVideoSSRC">
+                       <property name="maximum">
+                        <number>10000</number>
+                       </property>
+                       <property name="value">
+                        <number>2</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="0">
                       <widget class="QLabel" name="label_40">
                        <property name="text">
                         <string>Basic.Settings.Output.VideoBitrate</string>
@@ -302,7 +372,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="1">
+                     <item row="7" column="1">
                       <widget class="QSpinBox" name="advOutFFVBitrate">
                        <property name="minimum">
                         <number>0</number>
@@ -315,7 +385,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="0">
+                     <item row="8" column="0">
                       <widget class="QCheckBox" name="advOutFFUseRescale">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -331,7 +401,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="1">
+                     <item row="8" column="1">
                       <widget class="QComboBox" name="advOutFFRescale">
                        <property name="enabled">
                         <bool>false</bool>
@@ -341,7 +411,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="0">
+                     <item row="10" column="0">
                       <widget class="QLabel" name="label_41">
                        <property name="text">
                         <string>Basic.Settings.Output.AudioBitrate</string>
@@ -351,7 +421,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="1">
+                     <item row="10" column="1">
                       <widget class="QSpinBox" name="advOutFFABitrate">
                        <property name="minimum">
                         <number>32</number>
@@ -367,7 +437,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="10" column="0">
+                     <item row="12" column="0">
                       <widget class="QLabel" name="label_47">
                        <property name="text">
                         <string>Basic.Settings.Output.Adv.AudioTrack</string>
@@ -377,7 +447,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="10" column="1">
+                     <item row="12" column="1">
                       <widget class="QWidget" name="widget_10" native="true">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -432,73 +502,20 @@
                        </layout>
                       </widget>
                      </item>
-                     <item row="1" column="0">
-                      <widget class="QLabel" name="label_7">
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="label_19">
                        <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.ChannelID</string>
+                        <string>Basic.Setting.Output.Adv.FFmpeg.IngestLocation</string>
                        </property>
                        <property name="buddy">
-                        <cstring>advOutFTLChannelId</cstring>
+                        <cstring>advOutFTLIngestLoc</cstring>
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="1">
-                      <widget class="QSpinBox" name="advOutFTLChannelId">
-                       <property name="maximum">
-                        <number>1000000</number>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="0">
-                      <widget class="QLabel" name="label_9">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.StreamKey</string>
-                       </property>
-                       <property name="buddy">
-                        <cstring>advOutFTLStreamKey</cstring>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="1">
-                      <widget class="QLineEdit" name="advOutFTLStreamKey"/>
-                     </item>
-                     <item row="3" column="0">
-                      <widget class="QLabel" name="label_16">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.AudioSSRC</string>
-                       </property>
-                       <property name="buddy">
-                        <cstring>advOutFTLAudioSSRC</cstring>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="1">
-                      <widget class="QSpinBox" name="advOutFTLAudioSSRC">
-                       <property name="maximum">
-                        <number>100000</number>
-                       </property>
-                       <property name="value">
-                        <number>1</number>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="0">
-                      <widget class="QLabel" name="label_18">
-                       <property name="text">
-                        <string>Basic.Settings.Output.Adv.FFmpeg.VideoSSRC</string>
-                       </property>
-                       <property name="buddy">
-                        <cstring>advOutFTLVideoSSRC</cstring>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="1">
-                      <widget class="QSpinBox" name="advOutFTLVideoSSRC">
-                       <property name="maximum">
-                        <number>10000</number>
-                       </property>
-                       <property name="value">
-                        <number>2</number>
+                     <item row="0" column="1">
+                      <widget class="QComboBox" name="advOutFTLIngestLoc">
+                       <property name="editable">
+                        <bool>false</bool>
                        </property>
                       </widget>
                      </item>
@@ -628,12 +645,18 @@
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                          </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack1Bitrate</cstring>
+                         </property>
                         </widget>
                        </item>
                        <item row="1" column="0">
                         <widget class="QLabel" name="label_55">
                          <property name="text">
                           <string>Name</string>
+                         </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack1Name</cstring>
                          </property>
                         </widget>
                        </item>
@@ -674,6 +697,9 @@
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack2Bitrate</cstring>
                          </property>
                         </widget>
                        </item>
@@ -744,6 +770,9 @@
                          <property name="text">
                           <string>Name</string>
                          </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack2Name</cstring>
+                         </property>
                         </widget>
                        </item>
                        <item row="1" column="1">
@@ -783,6 +812,9 @@
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack3Bitrate</cstring>
                          </property>
                         </widget>
                        </item>
@@ -853,6 +885,9 @@
                          <property name="text">
                           <string>Name</string>
                          </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack3Name</cstring>
+                         </property>
                         </widget>
                        </item>
                        <item row="1" column="1">
@@ -892,6 +927,9 @@
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                         </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack4Bitrate</cstring>
                          </property>
                         </widget>
                        </item>
@@ -961,6 +999,9 @@
                         <widget class="QLabel" name="label_54">
                          <property name="text">
                           <string>Name</string>
+                         </property>
+                         <property name="buddy">
+                          <cstring>advOutTrack4Name</cstring>
                          </property>
                         </widget>
                        </item>
@@ -1137,8 +1178,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>28</height>
+              <width>80</width>
+              <height>16</height>
              </rect>
             </property>
            </widget>
@@ -1404,12 +1445,18 @@
                <property name="text">
                 <string>Basic.Settings.Video.Numerator</string>
                </property>
+               <property name="buddy">
+                <cstring>fpsNumerator</cstring>
+               </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_13">
                <property name="text">
                 <string>Basic.Settings.Video.Denominator</string>
+               </property>
+               <property name="buddy">
+                <cstring>fpsDenominator</cstring>
                </property>
               </widget>
              </item>
@@ -1540,6 +1587,9 @@
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
+                     <property name="buddy">
+                      <cstring>colorFormat</cstring>
+                     </property>
                     </widget>
                    </item>
                    <item row="2" column="1">
@@ -1571,6 +1621,9 @@
                      <property name="text">
                       <string>Basic.Settings.Advanced.Video.ColorRange</string>
                      </property>
+                     <property name="buddy">
+                      <cstring>colorRange</cstring>
+                     </property>
                     </widget>
                    </item>
                    <item row="4" column="1">
@@ -1580,6 +1633,9 @@
                     <widget class="QLabel" name="label_33">
                      <property name="text">
                       <string>Basic.Settings.Advanced.Video.ColorSpace</string>
+                     </property>
+                     <property name="buddy">
+                      <cstring>colorSpace</cstring>
                      </property>
                     </widget>
                    </item>
@@ -1602,6 +1658,9 @@
                      <property name="text">
                       <string>Basic.Settings.Video.Renderer</string>
                      </property>
+                     <property name="buddy">
+                      <cstring>renderer</cstring>
+                     </property>
                     </widget>
                    </item>
                    <item row="0" column="1">
@@ -1618,6 +1677,9 @@
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                     <property name="buddy">
+                      <cstring>adapter</cstring>
                      </property>
                     </widget>
                    </item>
@@ -1668,6 +1730,9 @@
                     <widget class="QLabel" name="label_56">
                      <property name="text">
                       <string>Basic.Settings.Advanced.StreamDelay.Duration</string>
+                     </property>
+                     <property name="buddy">
+                      <cstring>streamDelaySec</cstring>
                      </property>
                     </widget>
                    </item>
@@ -1754,6 +1819,9 @@
                      <property name="text">
                       <string>Basic.Settings.Output.RetryDelay</string>
                      </property>
+                     <property name="buddy">
+                      <cstring>reconnectRetryDelay</cstring>
+                     </property>
                     </widget>
                    </item>
                    <item row="0" column="1">
@@ -1777,6 +1845,9 @@
                     <widget class="QLabel" name="label_22">
                      <property name="text">
                       <string>Basic.Settings.Output.MaxRetries</string>
+                     </property>
+                     <property name="buddy">
+                      <cstring>reconnectMaxRetries</cstring>
                      </property>
                     </widget>
                    </item>
@@ -1844,21 +1915,21 @@
  <tabstops>
   <tabstop>listWidget</tabstop>
   <tabstop>advOutTabs</tabstop>
+  <tabstop>advOutFTLIngestLoc</tabstop>
   <tabstop>advOutFFURL</tabstop>
   <tabstop>advOutFTLChannelId</tabstop>
   <tabstop>advOutFTLStreamKey</tabstop>
   <tabstop>advOutFTLAudioSSRC</tabstop>
   <tabstop>advOutFTLVideoSSRC</tabstop>
   <tabstop>advOutFFVBitrate</tabstop>
+  <tabstop>advOutTrack1Bitrate</tabstop>
   <tabstop>advOutFFRescale</tabstop>
-  <tabstop>advOutFFABitrate</tabstop>
   <tabstop>advOutFFUseRescale</tabstop>
+  <tabstop>advOutFFABitrate</tabstop>
+  <tabstop>advOutFFTrack1</tabstop>
   <tabstop>advOutFFTrack2</tabstop>
   <tabstop>advOutFFTrack3</tabstop>
   <tabstop>advOutFFTrack4</tabstop>
-  <tabstop>advOutTrack1Bitrate</tabstop>
-  <tabstop>advOutTrack1Name</tabstop>
-  <tabstop>advOutTrack2Bitrate</tabstop>
   <tabstop>advOutTrack2Name</tabstop>
   <tabstop>advOutTrack3Bitrate</tabstop>
   <tabstop>advOutTrack3Name</tabstop>
@@ -1898,7 +1969,8 @@
   <tabstop>warnBeforeStreamStart</tabstop>
   <tabstop>warnBeforeStreamStop</tabstop>
   <tabstop>theme</tabstop>
-  <tabstop>advOutFFTrack1</tabstop>
+  <tabstop>advOutTrack2Bitrate</tabstop>
+  <tabstop>advOutTrack1Name</tabstop>
  </tabstops>
  <resources>
   <include location="obs.qrc"/>

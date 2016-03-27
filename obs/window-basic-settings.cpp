@@ -264,6 +264,7 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->theme, 		     COMBO_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStart,CHECK_CHANGED,  GENERAL_CHANGED);
 	HookWidget(ui->warnBeforeStreamStop, CHECK_CHANGED,  GENERAL_CHANGED);
+	HookWidget(ui->advOutFTLIngestLoc,   COMBO_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFURL,          EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFVBitrate,     SCROLL_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFFUseRescale,   CHECK_CHANGED,  OUTPUTS_CHANGED);
@@ -362,6 +363,9 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 
 	//Apply button disabled until change.
 	EnableApplyButton(false);
+
+	// Load the ingest LoadIngestLocations
+	LoadIngestLocations();
 
 	// Initialize libff library
 	ff_init();
@@ -498,6 +502,22 @@ void OBSBasicSettings::LoadFormats()
 {
 }
 
+void OBSBasicSettings::LoadIngestLocations() {
+	ui->advOutFTLIngestLoc->clear();
+	ui->advOutFTLIngestLoc->addItem("Australia (Melborne, Victoria)", QString("ingest-sjc.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Brazil (San Paulo)", QString("ingest-tor.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Canada (Toronto, ON)", QString("ingest-tor.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Europe (Amsterdam, Neterlands)", QString("ingest-ams.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Europe (London, United Kingdom)", QString("ingest-lon.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Europe (France)", QString("ingest-fra.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("United States (Dallas, TX)", QString("ingest-dal.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("United States (San Jose, CA)", QString("ingest-sjc.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("United States (Seattle, WA)", QString("ingest-sea.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("United States (Washington, DC)", QString 	("ingest-wdc.beam.pro"));
+
+	ui->advOutFTLIngestLoc->insertSeparator(100); // index of 100 forces it to the end
+	ui->advOutFTLIngestLoc->addItem("Other", QString(""));
+}
 static void AddCodec(QComboBox *combo, const ff_codec_desc *codec_desc)
 {
 	QString itemText(ff_codec_desc_name(codec_desc));
@@ -962,6 +982,32 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	int ftlVideoSSRC = config_get_int(main->Config(), "AdvOut",
 			"FTLVideoSSRC");
 
+	/* Set the dropdown on ingest correctly based on saved settings */
+	int known_ingests = ui->advOutFTLIngestLoc->count();
+	QString saved_ingest(url);
+
+	bool match_found = false;
+	blog(LOG_INFO, "HEREHEHRHERHEHREHERH!!!! %d", known_ingests);
+	for (int i = 0; i != known_ingests; i++) {
+		QString ingest_url;
+		ingest_url = ui->advOutFTLIngestLoc->itemData(i).toString();
+
+		blog (LOG_INFO, "test %s %s", ingest_url.toStdString().c_str(), saved_ingest.toStdString().c_str());
+		// See if this ingest matches the current index
+		if (ingest_url == saved_ingest) {
+			// Yaztee!, we've got a match
+			ui->advOutFTLIngestLoc->setCurrentIndex(i);
+			ui->advOutSavePathURLlabel->hide();
+			ui->advOutFFURL->hide();
+			match_found = true;
+			break;
+		}
+	}
+
+	if (match_found != true) {
+		/* Set the dropdown to custom which is always the bottom option */
+		ui->advOutFTLIngestLoc->setCurrentIndex(ui->advOutFTLIngestLoc->count()-1);
+	}
 	ui->advOutFFURL->setText(QT_UTF8(url));
 	ui->advOutFFVBitrate->setValue(videoBitrate);
 	ui->advOutFFUseRescale->setChecked(rescale);
@@ -2338,4 +2384,21 @@ void OBSBasicSettings::on_disableOSXVSync_clicked()
 		ui->resetOSXVSync->setEnabled(disable);
 	}
 #endif
+}
+
+void OBSBasicSettings::on_advOutFTLIngestLoc_currentIndexChanged(int idx)
+{
+	/* First we need to get the current index and its value */
+	QString ingest_url;
+	ingest_url = ui->advOutFTLIngestLoc->itemData(idx).toString();
+
+	/* If the string is empty, allow for a custom URL, else don't */
+	if (ingest_url == QString("")) {
+		ui->advOutSavePathURLlabel->show();
+		ui->advOutFFURL->show();
+	} else {
+		ui->advOutSavePathURLlabel->hide();
+		ui->advOutFFURL->hide();
+		ui->advOutFFURL->setText(ingest_url);
+	}
 }
