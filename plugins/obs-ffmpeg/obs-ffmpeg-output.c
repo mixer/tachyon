@@ -57,7 +57,7 @@ struct ffmpeg_cfg {
 	/* FTL specific fields */
 	const char			   *ingest_location;
 	uint32_t					channel_id;
-	const char				*stream_key;
+	char						stream_key[2048];
 	uint32_t					audio_ssrc;
 	uint32_t					video_ssrc;
 };
@@ -1035,6 +1035,10 @@ static int try_connect(struct ffmpeg_output *output)
 	ftl_status_t status_code;
 	int ret;
 
+	int len;
+	int got_streamkey = 0;
+	const char *full_streamkey;
+
 	settings = obs_output_get_settings(output->output);
 	config.ingest_location = get_string_or_null(settings, "url");
 	config.format_name = get_string_or_null(settings, "format_name");
@@ -1049,10 +1053,11 @@ static int try_connect(struct ffmpeg_output *output)
 	config.format = AV_PIX_FMT_YUV420P;
 
 	/* Load in FTL specific settings */
-	config.channel_id = (uint32_t)obs_data_get_int(settings, "ftl_channel_id");
-	config.stream_key = get_string_or_null(settings, "ftl_stream_key");
+	/* Stream key is processed below */
 	config.audio_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_audio_ssrc");
 	config.video_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_video_ssrc");
+
+	full_streamkey = get_string_or_null(settings, "ftl_stream_key");
 
 	/* snprintf out the muxer settings */
 	int size = 0;
@@ -1074,7 +1079,7 @@ static int try_connect(struct ffmpeg_output *output)
 		return OBS_OUTPUT_ERROR;
 	}
 
-	if (config.stream_key == NULL) {
+	if (full_streamkey == NULL) {
 		blog(LOG_WARNING, "stream key incorrect");
 		return OBS_OUTPUT_ERROR;
 	}
@@ -1104,6 +1109,32 @@ static int try_connect(struct ffmpeg_output *output)
 		config.scale_width = config.width;
 	if (!config.scale_height)
 		config.scale_height = config.height;
+
+	/* post-process the streamkey */
+	len = strlen(full_streamkey);
+	for (int i = 0; i != len; i++) {
+		/* find the comma that divides the stream key */
+		if (full_streamkey[i] == '-') {
+			/* stream key gets copied */
+			strcpy(config.stream_key, full_streamkey+i+1);
+
+			/* Now get the channel id */
+			char * copy_of_key = strdup(full_streamkey);
+			copy_of_key[i] = '\0';
+			config.channel_id = atol(copy_of_key);
+			free(copy_of_key);
+
+			got_streamkey = 1;
+			break;
+		}
+	}
+
+	if (got_streamkey) {
+		blog(LOG_WARNING, "got stream key: %s", config.stream_key);
+		blog(LOG_WARNING, "got channel id: %d", config.channel_id);
+	} else {
+		blog(LOG_WARNING, "unable to parse streamkey: %s", full_streamkey);
+	}
 
 	/* Use Charon to autheticate and configure muxer settings */
 	ftl_init();

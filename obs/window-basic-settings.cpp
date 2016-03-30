@@ -313,7 +313,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->reconnectMaxRetries,  SCROLL_CHANGED, ADV_CHANGED);
 
 	// FTL hooks
-	HookWidget(ui->advOutFTLChannelId,   SCROLL_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFTLStreamKey,	 EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFTLAudioSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
 	HookWidget(ui->advOutFTLVideoSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
@@ -1015,7 +1014,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	ui->advOutFFABitrate->setValue(audioBitrate);
 
 	/* Load FTL UI bits */
-	ui->advOutFTLChannelId->setValue(ftlChannelId);
 	ui->advOutFTLStreamKey->setText(QT_UTF8(ftlStreamKey));
 	ui->advOutFTLAudioSSRC->setValue(ftlAudioSSRC);
 	ui->advOutFTLVideoSSRC->setValue(ftlVideoSSRC);
@@ -1909,7 +1907,6 @@ void OBSBasicSettings::SaveOutputSettings()
 	SaveEdit(ui->advOutTrack4Name, "AdvOut", "Track4Name");
 
 	/* Save FTL data */
-	SaveSpinBox(ui->advOutFTLChannelId, "AdvOut", "FTLChannelID");
 	SaveEdit(ui->advOutFTLStreamKey, "AdvOut", "FTLStreamKey");
 	SaveSpinBox(ui->advOutFTLAudioSSRC, "AdvOut", "FTLAudioSSRC");
 	SaveSpinBox(ui->advOutFTLVideoSSRC, "AdvOut", "FTLVideoSSRC");
