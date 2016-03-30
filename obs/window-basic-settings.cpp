@@ -987,7 +987,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 	QString saved_ingest(url);
 
 	bool match_found = false;
-	blog(LOG_INFO, "HEREHEHRHERHEHREHERH!!!! %d", known_ingests);
 	for (int i = 0; i != known_ingests; i++) {
 		QString ingest_url;
 		ingest_url = ui->advOutFTLIngestLoc->itemData(i).toString();
