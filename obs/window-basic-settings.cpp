@@ -314,8 +314,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 
 	// FTL hooks
 	HookWidget(ui->advOutFTLStreamKey,	 EDIT_CHANGED,   OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFTLAudioSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
-	HookWidget(ui->advOutFTLVideoSSRC,   SCROLL_CHANGED, OUTPUTS_CHANGED);
 
 #ifdef _WIN32
 	uint32_t winVer = GetWindowsVersion();
@@ -976,10 +974,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 			"FTLChannelID");
 	const char *ftlStreamKey = config_get_string(main->Config(), "AdvOut",
 			"FTLStreamKey");
-	int ftlAudioSSRC = config_get_int(main->Config(), "AdvOut",
-			"FTLAudioSSRC");
-	int ftlVideoSSRC = config_get_int(main->Config(), "AdvOut",
-			"FTLVideoSSRC");
 
 	/* Set the dropdown on ingest correctly based on saved settings */
 	int known_ingests = ui->advOutFTLIngestLoc->count();
@@ -1015,8 +1009,6 @@ void OBSBasicSettings::LoadAdvOutputFFmpegSettings()
 
 	/* Load FTL UI bits */
 	ui->advOutFTLStreamKey->setText(QT_UTF8(ftlStreamKey));
-	ui->advOutFTLAudioSSRC->setValue(ftlAudioSSRC);
-	ui->advOutFTLVideoSSRC->setValue(ftlVideoSSRC);
 
 	switch (audioTrack) {
 	case 1: ui->advOutFFTrack1->setChecked(true); break;
@@ -1908,8 +1900,6 @@ void OBSBasicSettings::SaveOutputSettings()
 
 	/* Save FTL data */
 	SaveEdit(ui->advOutFTLStreamKey, "AdvOut", "FTLStreamKey");
-	SaveSpinBox(ui->advOutFTLAudioSSRC, "AdvOut", "FTLAudioSSRC");
-	SaveSpinBox(ui->advOutFTLVideoSSRC, "AdvOut", "FTLVideoSSRC");
 
 	WriteJsonData(streamEncoderProps, "streamEncoder.json");
 	WriteJsonData(recordEncoderProps, "recordEncoder.json");

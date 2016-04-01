@@ -117,9 +117,87 @@ struct ffmpeg_output {
 
 /* ------------------------------------------------------------------------- */
 
-void log_libftl_messages(ftl_log_severity_t log_level, const char * message) {
+void log_libftl_messages(ftl_log_severity_t log_level, const char * message)
+{
 	UNUSED_PARAMETER(log_level);
   blog(LOG_WARNING, "[libftl] %s", message);
+}
+
+// Returns 0 on success
+int map_ftl_error_to_obs_error(int status) {
+	/* Map FTL errors to OBS errors */
+	int ftl_to_obs_error_code = 0;
+	switch (status) {
+		case FTL_SUCCESS:
+			break;
+		case FTL_DNS_FAILURE:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_DNS_FAILURE;
+			break;
+		case FTL_CONNECT_ERROR:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_CONNECT_FAILURE;
+			break;
+		case FTL_OLD_VERSION:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_OLD_VERSION;
+			break;
+		case FTL_STREAM_REJECTED:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_STREAM_REJECTED;
+			break;
+		case FTL_UNAUTHORIZED:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_UNAUTHORIZED;
+			break;
+		case FTL_AUDIO_SSRC_COLLISION:
+			/* SSRC collision, let's back up and try with a new audio SSRC */
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_AUDIO_SSRC_COLLISION;
+			break;
+		case FTL_VIDEO_SSRC_COLLISION:
+			ftl_to_obs_error_code = OBS_OUTPUT_FTL_VIDEO_SSRC_COLLISION;
+			break;
+		/* Non-specific failures, or internal Tachyon bug */
+		default:
+			/* Unknown FTL error */
+			blog (LOG_ERROR, "tachyon error mapping needs to be updated!");
+			ftl_to_obs_error_code = OBS_OUTPUT_ERROR;
+	}
+
+	return ftl_to_obs_error_code;
+}
+
+ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_cfg config)
+{
+	ftl_status_t status_code;
+
+	/* Use Charon to autheticate and configure muxer settings */
+	ftl_init();
+	ftl_register_log_handler(log_libftl_messages);
+
+	status_code = ftl_create_stream_configuration(&(output->stream_config));
+	if (status_code != FTL_SUCCESS) {
+	 blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
+	 return OBS_OUTPUT_ERROR;
+   }
+
+	ftl_set_ingest_location(output->stream_config, config.ingest_location);
+	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
+
+	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
+	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
+
+	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
+	blog(LOG_WARNING, "test %d %d", config.audio_ssrc, config.video_ssrc);
+	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
+
+	status_code = ftl_activate_stream(output->stream_config);
+
+	int obs_status = map_ftl_error_to_obs_error(status_code);
+
+	if (status_code != FTL_SUCCESS) {
+		blog(LOG_ERROR, "Failed to initialize FTL Stream");
+		ftl_destory_stream(&(output->stream_config));
+		output->stream_config = 0;
+		return obs_status;
+	}
+
+	return obs_status;
 }
 
 static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
@@ -1032,7 +1110,6 @@ static int try_connect(struct ffmpeg_output *output)
 	struct ffmpeg_cfg config;
 	obs_data_t *settings;
 	bool success;
-	ftl_status_t status_code;
 	int ret;
 
 	int len;
@@ -1051,27 +1128,7 @@ static int try_connect(struct ffmpeg_output *output)
 	config.width  = (int)obs_output_get_width(output->output);
 	config.height = (int)obs_output_get_height(output->output);
 	config.format = AV_PIX_FMT_YUV420P;
-
-	/* Load in FTL specific settings */
-	/* Stream key is processed below */
-	config.audio_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_audio_ssrc");
-	config.video_ssrc = (uint32_t)obs_data_get_int(settings, "ftl_video_ssrc");
-
 	full_streamkey = get_string_or_null(settings, "ftl_stream_key");
-
-	/* snprintf out the muxer settings */
-	int size = 0;
-	size = snprintf(config.muxer_settings, 2048, "ssrc=%u", config.video_ssrc);
-	if (size == 2048) {
-		blog(LOG_WARNING, "snprintf failed on muxer settings!");
-		return OBS_OUTPUT_ERROR;
-	}
-
-	size = snprintf(config.audio_muxer_settings, 2048, "ssrc=%u payload_type=97", config.audio_ssrc);
-	if (size == 2048) {
-		blog(LOG_WARNING, "snprintf failed on muxer settings!");
-		return OBS_OUTPUT_ERROR;
-	}
 
 	/* Build the RTP command line */
 	if (config.ingest_location == NULL) {
@@ -1084,6 +1141,8 @@ static int try_connect(struct ffmpeg_output *output)
 		return OBS_OUTPUT_ERROR;
 	}
 
+	/* Glue together the ingest URL */
+	int size = 0;
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1420", config.ingest_location);
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
@@ -1134,70 +1193,33 @@ static int try_connect(struct ffmpeg_output *output)
 		blog(LOG_WARNING, "got channel id: %d", config.channel_id);
 	} else {
 		blog(LOG_WARNING, "unable to parse streamkey: %s", full_streamkey);
+		return OBS_OUTPUT_ERROR;
 	}
 
-	/* Use Charon to autheticate and configure muxer settings */
-	ftl_init();
-	ftl_register_log_handler(log_libftl_messages);
 
-	status_code = ftl_create_stream_configuration(&(output->stream_config));
-	if (status_code != FTL_SUCCESS) {
-     blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
-     return OBS_OUTPUT_ERROR;
-   }
+	/* With the power of MAGIC, let's generate a set of SSRCs using the channel id as a base */
+	/* If we collide, we will try a few more times (see attempt_ftl_connection) */
+	config.audio_ssrc = config.channel_id;
+	config.video_ssrc = config.channel_id+1;
 
-	ftl_set_ingest_location(output->stream_config, config.ingest_location);
-	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
+	/* snprintf out the muxer settings */
+	size = snprintf(config.muxer_settings, 2048, "ssrc=%d", config.video_ssrc);
+	if (size == 2048) {
+		blog(LOG_WARNING, "snprintf failed on muxer settings!");
+		return OBS_OUTPUT_ERROR;
+	}
 
-	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
-	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
-
-	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
-	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
+	size = snprintf(config.audio_muxer_settings, 2048, "ssrc=%d payload_type=97", config.audio_ssrc);
+	if (size == 2048) {
+		blog(LOG_WARNING, "snprintf failed on muxer settings!");
+		return OBS_OUTPUT_ERROR;
+	}
 
 	ftl_status_t activation_status;
 	int ftl_to_obs_error_code = 0;
 
-	activation_status = ftl_activate_stream(output->stream_config);
-
-	/* Map FTL errors to OBS errors */
-	switch (activation_status) {
-		case FTL_SUCCESS:
-			break;
-		case FTL_DNS_FAILURE:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_DNS_FAILURE;
-			break;
-		case FTL_CONNECT_ERROR:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_CONNECT_FAILURE;
-			break;
-		case FTL_OLD_VERSION:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_OLD_VERSION;
-			break;
-		case FTL_STREAM_REJECTED:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_STREAM_REJECTED;
-			break;
-		case FTL_UNAUTHORIZED:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_UNAUTHORIZED;
-			break;
-		case FTL_AUDIO_SSRC_COLLISION:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_AUDIO_SSRC_COLLISION;
-			break;
-		case FTL_VIDEO_SSRC_COLLISION:
-			ftl_to_obs_error_code = OBS_OUTPUT_FTL_VIDEO_SSRC_COLLISION;
-			break;
-		/* Non-specific failures, or internal Tachyon bug */
-		default:
-			/* Unknown FTL error */
-			blog (LOG_ERROR, "tachyon error mapping needs to be updated!");
-			ftl_to_obs_error_code = OBS_OUTPUT_ERROR;
-	}
-
-	if (activation_status != FTL_SUCCESS) {
-		blog(LOG_ERROR, "Failed to initialize FTL Stream");
-		ftl_destory_stream(&(output->stream_config));
-		output->stream_config = 0;
-		return ftl_to_obs_error_code;
-	}
+	activation_status = attempt_ftl_connection(output, config);
+	if (activation_status != 0) { return activation_status; }
 
 	success = ffmpeg_data_init(&output->ff_data, &config);
 	obs_data_release(settings);

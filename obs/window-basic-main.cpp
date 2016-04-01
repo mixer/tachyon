@@ -3445,6 +3445,10 @@ void OBSBasic::RecordingStop(int code)
 				QTStr("Output.FTLVideoSSRCCollision.Title"),
 				QTStr("Output.FTLVideoSSRCCollision.Msg"));
 
+	} else if (code == OBS_OUTPUT_FTL_BAD_STREAM_KEY) {
+		QMessageBox::information(this,
+				QTStr("Output.FTLBadStreamKey.Title"),
+				QTStr("Output.FTLBadStreamKey.Msg"));
 	} else if (code != OBS_OUTPUT_SUCCESS) {
 		QMessageBox::information(this,
 				QTStr("Output.RecordError.Title"),

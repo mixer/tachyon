@@ -51,6 +51,7 @@
 #define OBS_OUTPUT_FTL_DNS_FAILURE            -1006
 #define OBS_OUTPUT_FTL_CONNECT_FAILURE        -1007
 #define OBS_OUTPUT_FTL_STREAM_REJECTED        -1008
+#define OBS_OUTPUT_FTL_BAD_STREAM_KEY         -1009
 
 #define OBS_VIDEO_SUCCESS           0
 #define OBS_VIDEO_FAIL             -1
