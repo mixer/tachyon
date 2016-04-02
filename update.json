@@ -1,10 +1,10 @@
 {
 	"windows": {
 		"year": 2016,
-		"month": 4,
-		"day": 02,
+		"month": 2,
+		"day": 29,
 		"patch": 0,
-		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/20160402"
+		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/20160229"
 	},
 	"mac": {
 		"major": 0,
@@ -18,5 +18,5 @@
 		"patch": 0,
 		"download": "http://obsproject.com"
 	},
-	"description": "Based on OBS 0.13.3, the latest Tachyon has simplified setup and an intergrated browser plugin"
+	"description": "First Release of Tachyon to the general public"
 }
