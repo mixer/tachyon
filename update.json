@@ -1,10 +1,10 @@
 {
 	"windows": {
 		"year": 2016,
-		"month": 2,
-		"day": 29,
+		"month": 4,
+		"day": 4,
 		"patch": 0,
-		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/20160229"
+		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/2016.04.04"
 	},
 	"mac": {
 		"major": 0,
@@ -18,5 +18,5 @@
 		"patch": 0,
 		"download": "http://obsproject.com"
 	},
-	"description": "First Release of Tachyon to the general public"
+	"description": "Provides simplified FTL setup, and intergrated browser plugin"
 }
