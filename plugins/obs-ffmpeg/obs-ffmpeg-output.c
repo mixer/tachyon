@@ -1173,7 +1173,7 @@ static int try_connect(struct ffmpeg_output *output)
 	len = strlen(full_streamkey);
 	for (int i = 0; i != len; i++) {
 		/* find the comma that divides the stream key */
-		if (full_streamkey[i] == '-') {
+		if (full_streamkey[i] == '-' || full_streamkey[i] == ',') {
 			/* stream key gets copied */
 			strcpy(config.stream_key, full_streamkey+i+1);
 
