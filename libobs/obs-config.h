@@ -26,8 +26,8 @@
 
 /* Tachyon build number */
 #define TACHYON_BUILD_YEAR  2016
-#define TACHYON_BUILD_MONTH 2
-#define TACHYON_BUILD_DAY   29
+#define TACHYON_BUILD_MONTH 4
+#define TACHYON_BUILD_DAY   4
 #define TACHYON_PATCH       0
 
 /*
