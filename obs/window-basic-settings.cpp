@@ -501,8 +501,8 @@ void OBSBasicSettings::LoadFormats()
 
 void OBSBasicSettings::LoadIngestLocations() {
 	ui->advOutFTLIngestLoc->clear();
-	ui->advOutFTLIngestLoc->addItem("Australia (Melborne, Victoria)", QString("ingest-sjc.beam.pro"));
-	ui->advOutFTLIngestLoc->addItem("Brazil (San Paulo)", QString("ingest-tor.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Australia (Melborne, Victoria)", QString("ingest-mel.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Brazil (San Paulo)", QString("ingest-sao.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("Canada (Toronto, ON)", QString("ingest-tor.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("Europe (Amsterdam, Neterlands)", QString("ingest-ams.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("Europe (London, United Kingdom)", QString("ingest-lon.beam.pro"));
