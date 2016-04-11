@@ -1193,7 +1193,7 @@ static int try_connect(struct ffmpeg_output *output)
 		blog(LOG_WARNING, "got channel id: %d", config.channel_id);
 	} else {
 		blog(LOG_WARNING, "unable to parse streamkey: %s", full_streamkey);
-		return OBS_OUTPUT_ERROR;
+		return OBS_OUTPUT_FTL_BAD_STREAM_KEY;
 	}
 
 
