@@ -26,8 +26,8 @@ find_path(FTLSDK_INCLUDE_DIR
 		ENV FTLPath
 		ENV DepsPath${_lib_suffix}
 		ENV DepsPath
-		${ftlPath${_lib_suffix}}
-		${ftlPath}
+		${FTLPath${_lib_suffix}}
+		${FTLPath}
 		${DepsPath${_lib_suffix}}
 		${DepsPath}
 		${_FTL_INCLUDE_DIRS}
