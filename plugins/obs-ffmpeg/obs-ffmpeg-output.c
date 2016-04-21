@@ -203,25 +203,29 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
 		AVCodec **codec, enum AVCodecID id, int audio)
 {
-	if (audio == 1) {
-		*codec = avcodec_find_encoder(AV_CODEC_ID_OPUS);
-		*stream = avformat_new_stream(data->output_audio, *codec);
-	} else {
-		*codec = avcodec_find_encoder(AV_CODEC_ID_VP8);
-		*stream = avformat_new_stream(data->output_video, *codec);
+	*stream = NULL;
+
+	if ((*codec = avcodec_find_encoder(id)) != NULL) {
+		if (audio) {
+			*stream = avformat_new_stream(data->output_audio, *codec);
+		}
+		else {
+			*stream = avformat_new_stream(data->output_video, *codec);
+		}
 	}
+
 	if (!*stream) {
 		blog(LOG_WARNING, "Couldn't create stream for encoder '%s'",
 				avcodec_get_name(id));
 		return false;
 	}
-
-
+	
 	if (audio == 1) {
 		(*stream)->id = 0;
 	} else {
 		(*stream)->id = 1;
 	}
+
 	return true;
 }
 
@@ -253,7 +257,7 @@ static bool open_video_codec(struct ffmpeg_data *data)
 	AVCodecContext *context = data->video->codec;
 
 	/* Hardcode in quality=realtime */
-//	char **opts = strlist_split(data->config.video_settings, ' ', false);
+	//char **opts = strlist_split(data->config.video_settings, ' ', false);
 	char **opts = strlist_split("quality=realtime", ' ', false);
 	int ret;
 
@@ -337,7 +341,7 @@ static bool create_video_stream(struct ffmpeg_data *data)
 	 * source codec
 	 */
 
-	closest_format 					= AV_PIX_FMT_YUV420P;
+	closest_format 			= AV_PIX_FMT_YUV420P;
 	context                 = data->video->codec;
 	context->bit_rate       = data->config.video_bitrate * 1000;
 	context->width          = data->config.scale_width;
@@ -374,7 +378,8 @@ static bool create_video_stream(struct ffmpeg_data *data)
 static bool open_audio_codec(struct ffmpeg_data *data)
 {
 	AVCodecContext *context = data->audio->codec;
-	char **opts = strlist_split(data->config.video_settings, ' ', false);
+	//char **opts = strlist_split(data->config.video_settings, ' ', false);
+	char **opts = strlist_split(data->config.audio_settings, ' ', false);
 	int ret;
 
 	if (opts) {
@@ -567,11 +572,13 @@ static void close_video(struct ffmpeg_data *data)
 	avcodec_close(data->video->codec);
 	avpicture_free(&data->dst_picture);
 
-	// This format for some reason derefs video frame
-	// too many times
-	if (data->vcodec->id == AV_CODEC_ID_A64_MULTI ||
-	    data->vcodec->id == AV_CODEC_ID_A64_MULTI5)
-		return;
+	if (data->vcodec) {
+		// This format for some reason derefs video frame
+		// too many times
+		if (data->vcodec->id == AV_CODEC_ID_A64_MULTI ||
+			data->vcodec->id == AV_CODEC_ID_A64_MULTI5)
+			return;
+	}
 
 	av_frame_free(&data->vframe);
 }
@@ -670,6 +677,15 @@ static bool ffmpeg_data_init(struct ffmpeg_data *data,
 		return false;
 
 	av_register_all();
+
+	int version = avcodec_version();
+
+	blog(LOG_WARNING, "FFMPEG Version: %d.%d.%d\n", (0xFF0000 & version) >> 16, (0xFF00 & version) >> 8, version & 0xFF);
+
+	char *s = avcodec_configuration();
+
+	blog(LOG_WARNING, "AV Codec configurations %s\n", s);
+
 	avformat_network_init();
 
 	is_rtmp = (astrcmpi_n(config->url, "rtmp://", 7) == 0);
@@ -696,9 +712,9 @@ static bool ffmpeg_data_init(struct ffmpeg_data *data,
 	avformat_alloc_output_context2(&data->output_video, output_format2,
 			NULL, NULL);
 
-	if (data->config.format_name) {
+	//if (data->config.format_name) {
 		set_encoder_ids(data);
-	}
+	//}
 
 	if (!data->output_audio) {
 		blog(LOG_WARNING, "Couldn't create audio avformat context");
@@ -1117,6 +1133,7 @@ static int try_connect(struct ffmpeg_output *output)
 	const char *full_streamkey;
 
 	settings = obs_output_get_settings(output->output);
+	memset(&config, 0, sizeof(config));
 	config.ingest_location = get_string_or_null(settings, "url");
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
