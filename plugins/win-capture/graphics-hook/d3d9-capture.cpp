@@ -53,7 +53,7 @@ struct d3d9_data {
 			IDirect3DSurface9      *render_targets[NUM_BUFFERS];
 			IDirect3DQuery9        *queries[NUM_BUFFERS];
 			struct shmem_data      *shmem_info;
-			volatile bool          issued_queries[NUM_BUFFERS];
+			volatile bool	       issued_queries[NUM_BUFFERS];
 			bool                   texture_mapped[NUM_BUFFERS];
 			uint32_t               pitch;
 			int                    cur_tex;
