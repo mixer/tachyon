@@ -1,0 +1,80 @@
+#!/bin/bash
+set -e
+TEMP_INSTALL_PREFIX='/tmp/tachyon'
+INSTALL_PREFIX='/opt/tachyon'
+rm -fr TEMP_INSTALL_PREFIX
+mkdir -p TEMP_INSTALL_PREFIX
+export PKG_CONFIG_PATH+=:$INSTALL_PREFIX/lib/pkgconfig/
+##################
+#opus#
+##################
+git clone https://git.xiph.org/opus.git
+cd opus
+git checkout v1.1.2
+./autogen.sh
+./configure --prefix=$INSTALL_PREFIX
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ..
+#######################################
+#VP8###
+#######################################
+git clone https://chromium.googlesource.com/webm/libvpx
+cd libvpx
+git checkout v1.5.0
+mkdir build-libvpx
+cd    build-libvpx
+../configure --prefix=$INSTALL_PREFIX --enable-shared --disable-static --disable-vp9 --disable-vp10
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ../..
+#######################################
+####ffmpeg with opus and vp8
+########################################
+git clone https://git.ffmpeg.org/ffmpeg.git
+cd ffmpeg
+git checkout n3.0.2
+./configure --enable-shared --enable-libvpx --enable-libopus --prefix=$INSTALL_PREFIX
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ..
+#######################################
+#ftl-sdk
+#######################################
+git clone https://github.com/WatchBeam/ftl-sdk.git
+cd ftl-sdk
+mkdir build
+cd build
+cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ../..
+##########################
+#libx264
+##########################
+git clone http://git.videolan.org/git/x264.git
+cd x264 
+git checkout 2102de2
+./configure --enable-shared --prefix=$INSTALL_PREFIX
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ..
+##########################
+#Tachyon
+##########################
+#sudo apt-get install libxcb-xinerama0
+#sudo apt-get install libqt5x11extras5
+git clone https://github.com/WatchBeam/ftl-studio.git
+cd ftl-studio
+git checkout ftl-ffmpeg
+mkdir build
+cd build
+cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+make -j4
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ../.. 
+git clone https://github.com/bazukas/obs-qtwebkit.git
+cd obs-qtwebkit
+make
+make install DESTDIR=$TEMP_INSTALL_PREFIX
+cd ..

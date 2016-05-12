@@ -1,0 +1,4 @@
+ln -s /opt/tachyon/bin/tachyon /usr/bin/tachyon
+bash -c 'echo "/opt/tachyon/lib" > /etc/ld.so.conf.d/tachyon.conf'
+ldconfig
+
