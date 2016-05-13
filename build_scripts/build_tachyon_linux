@@ -2,8 +2,8 @@
 set -e
 TEMP_INSTALL_PREFIX='/tmp/tachyon'
 INSTALL_PREFIX='/opt/tachyon'
-rm -fr TEMP_INSTALL_PREFIX
-mkdir -p TEMP_INSTALL_PREFIX
+rm -fr $TEMP_INSTALL_PREFIX
+mkdir -p $TEMP_INSTALL_PREFIX
 export PKG_CONFIG_PATH+=:$INSTALL_PREFIX/lib/pkgconfig/
 ##################
 #opus#
