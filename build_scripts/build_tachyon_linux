@@ -70,7 +70,7 @@ git checkout ftl-ffmpeg
 mkdir build
 cd build
 cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
-make -j4
+make -j$(grep -c '^processor' /proc/cpuinfo)
 make install DESTDIR=$TEMP_INSTALL_PREFIX
 cd ../.. 
 git clone https://github.com/bazukas/obs-qtwebkit.git
