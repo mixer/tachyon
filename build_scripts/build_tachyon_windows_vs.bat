@@ -1,3 +1,6 @@
+REM check for cef binary
+REM check for dependencies (ffmpeg, etc)
+SET coredeps=C:\beam\dependencies2015
 SET DepsPath64=C:\beam\dependencies2015\win64
 SET FFmpegPath64=C:\beam\dependencies2015\win64
 SET x264Path64=C:\beam\dependencies2015\win64
@@ -10,7 +13,9 @@ echo "building CEF browser plugin"
 REM call python automate-git.py --download-dir=../.. --branch=2623 --x64-build
 REM SET cef_root_dir=%cd%\cef
 pushd .
-cd ..\..\
+cd ..
+call git submodule update --init
+cd ..
 REM windows 64 bit binary: https://cefbuilds.com/#branch_2623
 SET cef_root_dir=%cd%\cef_binary
 cd cef_binary
@@ -38,5 +43,6 @@ call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
 echo "Copying Browser plugin"
 xcopy %cef_root_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
 copy %cef_root_dir%\Release\libcef.dll rundir\Release\obs-plugins\64bit\
-copy %cef_root_dir%\Release\natives_blob.bin.dll rundir\Release\obs-plugins\64bit\
-copy %cef_root_dir%\Release\snapshot_blob.bin.dll rundir\Release\obs-plugins\64bit\
+copy %cef_root_dir%\Release\natives_blob.bin rundir\Release\obs-plugins\64bit\
+copy %cef_root_dir%\Release\snapshot_blob.bin rundir\Release\obs-plugins\64bit\
+copy %coredeps%\win64\bin\postproc-54.dll rundir\Release\bin\64bit
