@@ -1,4 +1,3 @@
-echo @off
 SET DepsPath64=C:\beam\dependencies2015\win64
 SET FFmpegPath64=C:\beam\dependencies2015\win64
 SET x264Path64=C:\beam\dependencies2015\win64
@@ -35,3 +34,9 @@ SET ftl_lib_dir=%cd%\Release\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
 cmake -G "Visual Studio 14 2015 Win64" -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_root_dir% -DCOPY_DEPENDENCIES=true ..
+call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
+echo "Copying Browser plugin"
+xcopy %cef_root_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
+copy %cef_root_dir%\Release\libcef.dll rundir\Release\obs-plugins\64bit\
+copy %cef_root_dir%\Release\natives_blob.bin.dll rundir\Release\obs-plugins\64bit\
+copy %cef_root_dir%\Release\snapshot_blob.bin.dll rundir\Release\obs-plugins\64bit\
