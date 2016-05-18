@@ -47,7 +47,10 @@ cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFT
 call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
 echo "Copying Browser plugin"
 xcopy %cef_binary_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
-copy %cef_binary_dir%\Release\*.dll rundir\Release\obs-plugins\64bit\
+copy %cef_binary_dir%\Release\d3dcompiler_43.dll rundir\Release\obs-plugins\64bit\
+copy %cef_binary_dir%\Release\d3dcompiler_47.dll rundir\Release\obs-plugins\64bit\
+copy %cef_binary_dir%\Release\libcef.dll rundir\Release\obs-plugins\64bit\
+copy %cef_binary_dir%\Release\widevinecdmadapter.dll rundir\Release\obs-plugins\64bit\
 copy %cef_binary_dir%\Release\natives_blob.bin rundir\Release\obs-plugins\64bit\
 copy %cef_binary_dir%\Release\snapshot_blob.bin rundir\Release\obs-plugins\64bit\
 copy %coredeps%\win64\bin\postproc-54.dll rundir\Release\bin\64bit
