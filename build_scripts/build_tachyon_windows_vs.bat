@@ -1,5 +1,6 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
+SET obs_version=1.0.1
 SET cef_binary_dir=C:\beam\cef_binary
 SET coredeps=C:\beam\dependencies2015
 SET QTDIR64=C:\Qt\5.6\msvc2015_64
@@ -42,7 +43,7 @@ call msbuild /t:Rebuild /p:Configuration=Release,Platform=x64 ftl.vcxproj
 SET ftl_lib_dir=%cd%\Release\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
-cmake -G "Visual Studio 14 2015 Win64" -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
+cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
 call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
 echo "Copying Browser plugin"
 xcopy %cef_binary_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
