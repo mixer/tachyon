@@ -9,7 +9,8 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
-SetCompressor bzip2
+;SetCompressor bzip2
+SetCompressor /SOLID Lzma
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -26,8 +27,14 @@ SetCompressor bzip2
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\bin\64bit\tachyon64.exe"
+;!define MUI_FINISHPAGE_RUN "$INSTDIR\bin\64bit\tachyon64.exe"
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_FUNCTION launch_tachyon
 !insertmacro MUI_PAGE_FINISH
+
+Function launch_tachyon
+         ExecShell "" "$SMPROGRAMS\Tachyon\Tachyon.lnk"
+FunctionEnd
 
 ; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -55,7 +62,6 @@ Section "MainSection" SEC01
   File "rundir\Release\bin\64bit\avfilter-6.dll"
   File "rundir\Release\bin\64bit\avformat-57.dll"
   File "rundir\Release\bin\64bit\avutil-55.dll"
-  File "rundir\Release\bin\64bit\debug.log"
   File "rundir\Release\bin\64bit\ftl.dll"
   File "rundir\Release\bin\64bit\icudt54.dll"
   File "rundir\Release\bin\64bit\icuin54.dll"
@@ -117,6 +123,10 @@ Section "browser" SEC03
   File "rundir\Release\obs-plugins\64bit\devtools_resources.pak"
   File "rundir\Release\obs-plugins\64bit\icudtl.dat"
   File "rundir\Release\obs-plugins\64bit\libcef.dll"
+  File "rundir\Release\obs-plugins\64bit\d3dcompiler_43.dll" 
+  File "rundir\Release\obs-plugins\64bit\d3dcompiler_47.dll"
+;  File "rundir\Release\obs-plugins\64bit\libEGL.dll"
+;  File "rundir\Release\obs-plugins\64bit\libGLESv2.dll"  
   SetOutPath "$INSTDIR\obs-plugins\64bit\locales"
   File "rundir\Release\obs-plugins\64bit\locales\am.pak"
   File "rundir\Release\obs-plugins\64bit\locales\ar.pak"
@@ -1366,6 +1376,10 @@ Section Uninstall
   Delete "$INSTDIR\obs-plugins\64bit\locales\ar.pak"
   Delete "$INSTDIR\obs-plugins\64bit\locales\am.pak"
   Delete "$INSTDIR\obs-plugins\64bit\libcef.dll"
+  Delete "$INSTDIR\obs-plugins\64bit\d3dcompiler_43.dll" 
+  Delete "$INSTDIR\obs-plugins\64bit\d3dcompiler_47.dll"
+;  Delete "$INSTDIR\obs-plugins\64bit\libEGL.dll"
+;  Delete "$INSTDIR\obs-plugins\64bit\libGLESv2.dll"  
   Delete "$INSTDIR\obs-plugins\64bit\icudtl.dat"
   Delete "$INSTDIR\obs-plugins\64bit\devtools_resources.pak"
   Delete "$INSTDIR\obs-plugins\64bit\cef_extensions.pak"
@@ -1414,7 +1428,6 @@ Section Uninstall
   Delete "$INSTDIR\bin\64bit\icuin54.dll"
   Delete "$INSTDIR\bin\64bit\icudt54.dll"
   Delete "$INSTDIR\bin\64bit\ftl.dll"
-  Delete "$INSTDIR\bin\64bit\debug.log"
   Delete "$INSTDIR\bin\64bit\avutil-55.dll"
   Delete "$INSTDIR\bin\64bit\avformat-57.dll"
   Delete "$INSTDIR\bin\64bit\avfilter-6.dll"
