@@ -166,20 +166,23 @@ static void scroll_filter_render(void *data, gs_effect_t *effect)
 	cx = filter->limit_cx ? filter->cx : base_cx;
 	cy = filter->limit_cy ? filter->cy : base_cy;
 
-	if (cx && cy) {
+	if (base_cx && base_cy) {
 		vec2_set(&filter->size_i,
 				1.0f / (float)base_cx,
 				1.0f / (float)base_cy);
 	} else {
 		vec2_zero(&filter->size_i);
+		obs_source_skip_video_filter(filter->context);
+		return;
 	}
 
 	vec2_set(&mul_val,
 			(float)cx / (float)base_cx,
 			(float)cy / (float)base_cy);
 
-	obs_source_process_filter_begin(filter->context, GS_RGBA,
-			OBS_NO_DIRECT_RENDERING);
+	if (!obs_source_process_filter_begin(filter->context, GS_RGBA,
+				OBS_NO_DIRECT_RENDERING))
+		return;
 
 	gs_effect_set_vec2(filter->param_add, &filter->offset);
 	gs_effect_set_vec2(filter->param_mul, &mul_val);

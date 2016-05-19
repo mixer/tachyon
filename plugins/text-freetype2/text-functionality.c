@@ -99,6 +99,12 @@ void set_up_vertex_buffer(struct ft2_source *srcdata)
 		srcdata->vbuf = NULL;
 		gs_vertexbuffer_destroy(tmpvbuf);
 	}
+
+	if (*srcdata->text == 0) {
+		obs_leave_graphics();
+		return;
+	}
+
 	srcdata->vbuf = create_uv_vbuffer((uint32_t)wcslen(srcdata->text) * 6,
 			true);
 
@@ -241,7 +247,6 @@ void cache_glyphs(struct ft2_source *srcdata, wchar_t *cache_glyphs)
 	slot = srcdata->font_face->glyph;
 
 	uint32_t dx = srcdata->texbuf_x, dy = srcdata->texbuf_y;
-	uint8_t alpha;
 
 	int32_t cached_glyphs = 0;
 	size_t len = wcslen(cache_glyphs);
@@ -266,6 +271,11 @@ void cache_glyphs(struct ft2_source *srcdata, wchar_t *cache_glyphs)
 			dy += srcdata->max_h + 1;
 		}
 
+		if (dy + g_h >= texbuf_h) {
+			blog(LOG_WARNING, "Out of space trying to render glyphs");
+			break;
+		}
+
 		src_glyph = bzalloc(sizeof(struct glyph_info));
 		src_glyph->u = (float)dx / (float)texbuf_w;
 		src_glyph->u2 = (float)(dx + g_w) / (float)texbuf_w;
@@ -278,11 +288,9 @@ void cache_glyphs(struct ft2_source *srcdata, wchar_t *cache_glyphs)
 		src_glyph->xadv = slot->advance.x >> 6;
 
 		for (uint32_t y = 0; y < g_h; y++) {
-			for (uint32_t x = 0; x < g_w; x++) {
-				alpha = slot->bitmap.buffer[glyph_pos];
+			for (uint32_t x = 0; x < g_w; x++)
 				srcdata->texbuf[buf_pos] =
-					0x00FFFFFF ^ ((uint32_t)alpha << 24);
-			}
+					slot->bitmap.buffer[glyph_pos];
 		}
 
 		dx += (g_w + 1);
@@ -310,7 +318,7 @@ void cache_glyphs(struct ft2_source *srcdata, wchar_t *cache_glyphs)
 		}
 
 		srcdata->tex = gs_texture_create(texbuf_w, texbuf_h,
-			GS_RGBA, 1, (const uint8_t **)&srcdata->texbuf, 0);
+			GS_A8, 1, (const uint8_t **)&srcdata->texbuf, 0);
 
 		obs_leave_graphics();
 	}
@@ -322,7 +330,8 @@ time_t get_modified_timestamp(char *filename)
 
 	// stat is apparently terrifying and horrible, but we only call it once
 	// every second at most.
-	stat(filename, &stats);
+	if (os_stat(filename, &stats) != 0)
+		return -1;
 
 	return stats.st_mtime;
 }

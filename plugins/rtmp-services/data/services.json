@@ -58,6 +58,10 @@
                     "url": "rtmp://live-arn.twitch.tv/app"
                 },
                 {
+                    "name": "EU: Warsaw, Poland",
+                    "url": "rtmp://live-waw.twitch.tv/app"
+                },
+                {
                     "name": "South America: Argentina",
                     "url": "rtmp://live-eze.twitch.tv/app"
                 },
@@ -110,7 +114,8 @@
                 "keyint": 2,
                 "profile": "main",
                 "max video bitrate": 3500,
-                "max audio bitrate": 160
+                "max audio bitrate": 160,
+                "x264opts": "scenecut=0"
             }
         },
         {
@@ -310,7 +315,7 @@
             ]
         },
         {
-            "name": "Restream.io",
+            "name": "mSportz",
             "servers": [
                 {
                     "name": "EU-West (Amsterdam, NL)",
@@ -459,6 +464,75 @@
                 {
                     "name": "Low Priority, DE",
                     "url": "rtmp://de.live.cashplay.tv/live"
+                }
+            ]
+        },
+        {
+            "name": "DJlive.pl",
+            "servers": [
+                {
+                    "name": "Default",
+                    "url": "rtmp://live.djlive.pl/live"
+                }
+            ],
+            "recommended": {
+                "keyint": 1,
+                "profile": "high",
+                "max video bitrate": 1300,
+                "max audio bitrate": 320
+            }
+        },
+        {
+            "name": "Facebook Live",
+            "common": true,
+            "servers": [
+                {
+                    "name": "Default",
+                    "url": "rtmp://rtmp-api.facebook.com:80/rtmp/"
+                }
+            ],
+            "recommended": {
+                "keyint": 2,
+                "profile": "main",
+                "max video bitrate": 2500,
+                "max audio bitrate": 160
+            }
+        },
+        {
+            "name": "Restream.io",
+            "common": true,
+            "servers": [
+                {
+                    "name": "US-West (San Jose, California)",
+                    "url": "rtmp://us-west.restream.io/live"
+                },
+                {
+                    "name": "US-West (Los Angeles, California)",
+                    "url": "rtmp://us-la.restream.io/live"
+                },
+                {
+                    "name": "US-East (Washington, D.C.)",
+                    "url": "rtmp://us-east.restream.io/live"
+                },
+                {
+                    "name": "US-Central (Dallas, TX)",
+                    "url": "rtmp://us-central.restream.io/live"
+                },
+                {
+                    "name": "EU-Central (Frankfurt, Germany)",
+                    "url": "rtmp://eu.restream.io/live"
+                },
+                {
+                    "name": "EU-West (London, GB)",
+                    "url": "rtmp://eu-london.restream.io/live"
+                },
+                {
+                    "name": "Australia (Sydney)",
+                    "url": "rtmp://au-secondary.restream.io/live"
+                },
+                {
+                    "name": "South America (Sao Paulo, Brazil)",
+                    "url": "rtmp://sa.restream.io/live"
                 }
             ]
         }
