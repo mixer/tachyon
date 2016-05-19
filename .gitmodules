@@ -5,3 +5,7 @@
 [submodule "plugins/mac-syphon/syphon-framework"]
 	path = plugins/mac-syphon/syphon-framework
 	url = https://github.com/palana/Syphon-Framework.git
+	
+[submodule "plugins/obs-browser"]
+	path = plugins/obs-browser
+	url = https://github.com/kc5nra/obs-browser.git
