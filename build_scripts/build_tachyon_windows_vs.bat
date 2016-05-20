@@ -1,6 +1,6 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
-SET obs_version=1.0.1
+SET obs_version=1.1.0
 SET cef_binary_dir=C:\beam\cef_binary
 SET coredeps=C:\beam\dependencies2015
 SET QTDIR64=C:\Qt\5.6\msvc2015_64
@@ -26,25 +26,25 @@ REM cd cef_binary
 mkdir build
 cd build
 cmake -G "Visual Studio 14 2015 Win64" ..
-msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
+msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj || exit /b
 REM current CEF plugin expects this one folder down
 copy libcef_dll\Release\libcef_dll_wrapper.lib libcef_dll\
 REM /machine is set incorrectly should be x64
 REM cd..\..
 popd
 echo "building libftl"
-call git clone https://github.com/WatchBeam/ftl-sdk.git
+call git clone https://github.com/WatchBeam/ftl-sdk.git 
 cd ftl-sdk
 mkdir build
 cd build
 cmake -G "Visual Studio 14 2015 Win64" ..
 REM Microsoft Build Tools 2015 https://www.microsoft.com/en-us/download/details.aspx?id=4815
-call msbuild /t:Rebuild /p:Configuration=Release,Platform=x64 ftl.vcxproj
+call msbuild /t:Rebuild /p:Configuration=Release,Platform=x64 ftl.vcxproj || exit /b
 SET ftl_lib_dir=%cd%\Release\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
 cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
-call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj
+call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj || exit /b
 echo "Copying Browser plugin"
 xcopy %cef_binary_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
 copy %cef_binary_dir%\Release\d3dcompiler_43.dll rundir\Release\obs-plugins\64bit\

@@ -325,8 +325,6 @@ void SimpleOutput::Update()
 	bool advanced = 1;
 	bool enforceBitrate = config_get_bool(main->Config(), "SimpleOutput",
 			"EnforceBitrate");
-	const char *preset = config_get_string(main->Config(),
-			"SimpleOutput", "Preset");
 	const char *custom = config_get_string(main->Config(),
 			"SimpleOutput", "x264Settings");
 	const char *encoder = config_get_string(main->Config(), "SimpleOutput",

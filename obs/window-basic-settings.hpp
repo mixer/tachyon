@@ -281,8 +281,6 @@ private slots:
 	void SimpleRecordingEncoderChanged();
 	void SimpleRecordingQualityLosslessWarning(int idx);
 
-	void SimpleStreamingEncoderChanged();
-
 protected:
 	virtual void closeEvent(QCloseEvent *event);
 
