@@ -1160,7 +1160,7 @@ static int try_connect(struct ffmpeg_output *output)
 
 	/* Glue together the ingest URL */
 	int size = 0;
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1420", config.ingest_location);
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;

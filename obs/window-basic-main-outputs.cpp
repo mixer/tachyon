@@ -565,10 +565,6 @@ bool SimpleOutput::StartRecording()
 			"MuxerCustom");
 	bool noSpace = config_get_bool(main->Config(), "SimpleOutput",
 			"FileNameWithoutSpace");
-	const char *filenameFormat = config_get_string(main->Config(), "Output",
-				"FilenameFormatting");
-	bool overwriteIfExists = config_get_bool(main->Config(), "Output",
-				"OverwriteIfExists");
 
 	os_dir_t *dir = path ? os_opendir(path) : nullptr;
 
@@ -588,10 +584,8 @@ bool SimpleOutput::StartRecording()
 	if (lastChar != '/' && lastChar != '\\')
 		strPath += "/";
 
-	strPath += GenerateSpecifiedFilename(ffmpegOutput ? "avi" : format,
-			noSpace, filenameFormat);
-	if (!overwriteIfExists)
-		FindBestFilename(strPath, noSpace);
+	strPath += GenerateTimeDateFilename(ffmpegOutput ? "avi" : format,
+			noSpace);
 
 	SetupOutputs();
 

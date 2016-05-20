@@ -1,17 +1,14 @@
 /******************************************************************************
     Copyright (C) 2013-2014 by Hugh Bailey <obs.jim@gmail.com>
                                Philippe Groarke <philippe.groarke@gmail.com>
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
@@ -22,7 +19,6 @@
 #include <graphics/math-defs.h>
 #include <initializer_list>
 #include <sstream>
-#include <QCompleter>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -137,15 +133,11 @@ static inline void SetComboByName(QComboBox *combo, const char *name)
 		combo->setCurrentIndex(idx);
 }
 
-static inline bool SetComboByValue(QComboBox *combo, const char *name)
+static inline void SetComboByValue(QComboBox *combo, const char *name)
 {
 	int idx = combo->findData(QT_UTF8(name));
-	if (idx != -1) {
+	if (idx != -1)
 		combo->setCurrentIndex(idx);
-		return true;
-	}
-
-	return false;
 }
 
 static inline QString GetComboData(QComboBox *combo)
@@ -235,7 +227,6 @@ void OBSBasicSettings::HookWidget(QWidget *widget, const char *signal,
 #define CBEDIT_CHANGED  SIGNAL(editTextChanged(const QString &))
 #define CHECK_CHANGED   SIGNAL(clicked(bool))
 #define SCROLL_CHANGED  SIGNAL(valueChanged(int))
-#define DSCROLL_CHANGED SIGNAL(valueChanged(double))
 
 #define GENERAL_CHANGED SLOT(GeneralChanged())
 #define STREAM1_CHANGED SLOT(Stream1Changed())
@@ -311,8 +302,6 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->colorRange,           COMBO_CHANGED,  ADV_CHANGED);
 	HookWidget(ui->disableOSXVSync,      CHECK_CHANGED,  ADV_CHANGED);
 	HookWidget(ui->resetOSXVSync,        CHECK_CHANGED,  ADV_CHANGED);
-	HookWidget(ui->filenameFormatting,   EDIT_CHANGED,   ADV_CHANGED);
-	HookWidget(ui->overwriteIfExists,    CHECK_CHANGED,  ADV_CHANGED);
 	HookWidget(ui->streamDelayEnable,    CHECK_CHANGED,  ADV_CHANGED);
 	HookWidget(ui->streamDelaySec,       SCROLL_CHANGED, ADV_CHANGED);
 	HookWidget(ui->streamDelayPreserve,  CHECK_CHANGED,  ADV_CHANGED);
@@ -625,27 +614,6 @@ void OBSBasicSettings::LoadGeneralSettings()
 
 	LoadLanguageList();
 	LoadThemeList();
-
-	bool snappingEnabled = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SnappingEnabled");
-	ui->snappingEnabled->setChecked(snappingEnabled);
-
-	bool screenSnapping = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "ScreenSnapping");
-	ui->screenSnapping->setChecked(screenSnapping);
-
-	bool centerSnapping = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "CenterSnapping");
-	ui->centerSnapping->setChecked(centerSnapping);
-
-	bool sourceSnapping = config_get_bool(GetGlobalConfig(),
-			"BasicWindow", "SourceSnapping");
-	ui->sourceSnapping->setChecked(sourceSnapping);
-
-	double snapDistance = config_get_double(GetGlobalConfig(),
-			"BasicWindow", "SnapDistance");
-	ui->snapDistance->setValue(snapDistance);
-
 
 	bool warnBeforeStreamStart = config_get_bool(GetGlobalConfig(),
 			"BasicWindow", "WarnBeforeStartingStream");
@@ -1378,17 +1346,10 @@ void OBSBasicSettings::LoadAdvancedSettings()
 			"RetryDelay");
 	int maxRetries = config_get_int(main->Config(), "Output",
 			"MaxRetries");
-	const char *filename = config_get_string(main->Config(), "Output",
-			"FilenameFormatting");
-	bool overwriteIfExists = config_get_bool(main->Config(), "Output",
-			"OverwriteIfExists");
 
 	loading = true;
 
 	LoadRendererList();
-
-	ui->filenameFormatting->setText(filename);
-	ui->overwriteIfExists->setChecked(overwriteIfExists);
 
 	ui->reconnectEnable->setChecked(reconnect);
 	ui->reconnectRetryDelay->setValue(retryDelay);
@@ -1741,27 +1702,6 @@ void OBSBasicSettings::SaveGeneralSettings()
 		App()->SetTheme(theme);
 	}
 
-	if (WidgetChanged(ui->snappingEnabled))
-		config_set_bool(GetGlobalConfig(), "BasicWindow",
-				"SnappingEnabled",
-				ui->snappingEnabled->isChecked());
-	if (WidgetChanged(ui->screenSnapping))
-		config_set_bool(GetGlobalConfig(), "BasicWindow",
-				"ScreenSnapping",
-				ui->screenSnapping->isChecked());
-	if (WidgetChanged(ui->centerSnapping))
-		config_set_bool(GetGlobalConfig(), "BasicWindow",
-				"CenterSnapping",
-				ui->centerSnapping->isChecked());
-	if (WidgetChanged(ui->sourceSnapping))
-		config_set_bool(GetGlobalConfig(), "BasicWindow",
-				"SourceSnapping",
-				ui->sourceSnapping->isChecked());
-	if (WidgetChanged(ui->snapDistance))
-		config_set_double(GetGlobalConfig(), "BasicWindow",
-				"SnapDistance",
-				ui->snapDistance->value());
-
 	config_set_bool(GetGlobalConfig(), "BasicWindow",
 			"WarnBeforeStartingStream",
 			ui->warnBeforeStreamStart->isChecked());
@@ -1837,8 +1777,6 @@ void OBSBasicSettings::SaveAdvancedSettings()
 	SaveCombo(ui->colorFormat, "Video", "ColorFormat");
 	SaveCombo(ui->colorSpace, "Video", "ColorSpace");
 	SaveComboData(ui->colorRange, "Video", "ColorRange");
-	SaveEdit(ui->filenameFormatting, "Output", "FilenameFormatting");
-	SaveCheckBox(ui->overwriteIfExists, "Output", "OverwriteIfExists");
 	SaveCheckBox(ui->streamDelayEnable, "Output", "DelayEnable");
 	SaveSpinBox(ui->streamDelaySec, "Output", "DelaySec");
 	SaveCheckBox(ui->streamDelayPreserve, "Output", "DelayPreserve");
@@ -2219,23 +2157,6 @@ void OBSBasicSettings::RecalcOutputResPixels(const char *resText)
 		outputCX = newCX;
 		outputCY = newCY;
 	}
-}
-
-
-void OBSBasicSettings::on_filenameFormatting_textEdited(const QString &text)
-{
-#ifdef __APPLE__
-	size_t invalidLocation =
-		text.toStdString().find_first_of(":/\\");
-#elif  _WIN32
-	size_t invalidLocation =
-		text.toStdString().find_first_of("<>:\"/\\|?*");
-#else
-	size_t invalidLocation = text.toStdString().find_first_of("/");
-#endif
-
-	if (invalidLocation != string::npos)
-		ui->filenameFormatting->backspace();
 }
 
 void OBSBasicSettings::on_outputResolution_editTextChanged(const QString &text)
