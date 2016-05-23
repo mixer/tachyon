@@ -470,7 +470,11 @@ void device_load_texture(gs_device_t *device, gs_texture_t *tex, int unit)
 	if (!tex)
 		return;
 
-	sampler = device->cur_samplers[param->sampler_id];
+	// texelFetch doesn't need a sampler
+	if (param->sampler_id != (size_t)-1)
+		sampler = device->cur_samplers[param->sampler_id];
+	else
+		sampler = NULL;
 
 	if (!gl_bind_texture(tex->gl_target, tex->texture))
 		goto fail;
@@ -975,7 +979,7 @@ void device_draw(gs_device_t *device, enum gs_draw_mode draw_mode,
 	if (!program)
 		goto fail;
 
-	load_vb_buffers(program, device->cur_vertex_buffer);
+	load_vb_buffers(program, device->cur_vertex_buffer, ib);
 
 	if (program != device->cur_program && device->cur_program) {
 		glUseProgram(0);

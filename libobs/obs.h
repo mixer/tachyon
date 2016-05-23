@@ -232,6 +232,7 @@ struct obs_source_frame {
 
 	/* used internally by libobs */
 	volatile long       refs;
+	bool                prev_frame;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -520,6 +521,7 @@ enum obs_base_effect {
 	OBS_EFFECT_BICUBIC,            /**< Bicubic downscale */
 	OBS_EFFECT_LANCZOS,            /**< Lanczos downscale */
 	OBS_EFFECT_BILINEAR_LOWRES,    /**< Bilinear low resolution downscale */
+	OBS_EFFECT_PREMULTIPLIED_ALPHA,/**< Premultiplied alpha */
 };
 
 /** Returns a commonly used base effect */
@@ -573,6 +575,7 @@ enum obs_obj_type {
 
 EXPORT enum obs_obj_type obs_obj_get_type(void *obj);
 EXPORT const char *obs_obj_get_id(void *obj);
+EXPORT bool obs_obj_invalid(void *obj);
 
 
 /* ------------------------------------------------------------------------- */
@@ -878,6 +881,32 @@ EXPORT void obs_source_add_audio_capture_callback(obs_source_t *source,
 EXPORT void obs_source_remove_audio_capture_callback(obs_source_t *source,
 		obs_source_audio_capture_t callback, void *param);
 
+enum obs_deinterlace_mode {
+	OBS_DEINTERLACE_MODE_DISABLE,
+	OBS_DEINTERLACE_MODE_DISCARD,
+	OBS_DEINTERLACE_MODE_RETRO,
+	OBS_DEINTERLACE_MODE_BLEND,
+	OBS_DEINTERLACE_MODE_BLEND_2X,
+	OBS_DEINTERLACE_MODE_LINEAR,
+	OBS_DEINTERLACE_MODE_LINEAR_2X,
+	OBS_DEINTERLACE_MODE_YADIF,
+	OBS_DEINTERLACE_MODE_YADIF_2X
+};
+
+enum obs_deinterlace_field_order {
+	OBS_DEINTERLACE_FIELD_ORDER_TOP,
+	OBS_DEINTERLACE_FIELD_ORDER_BOTTOM
+};
+
+EXPORT void obs_source_set_deinterlace_mode(obs_source_t *source,
+		enum obs_deinterlace_mode mode);
+EXPORT enum obs_deinterlace_mode obs_source_get_deinterlace_mode(
+		const obs_source_t *source);
+EXPORT void obs_source_set_deinterlace_field_order(obs_source_t *source,
+		enum obs_deinterlace_field_order field_order);
+EXPORT enum obs_deinterlace_field_order obs_source_get_deinterlace_field_order(
+		const obs_source_t *source);
+
 /* ------------------------------------------------------------------------- */
 /* Functions used by sources */
 
@@ -939,8 +968,11 @@ EXPORT void obs_source_release_frame(obs_source_t *source,
  *
  * After calling this, set your parameters for the effect, then call
  * obs_source_process_filter_end to draw the filter.
+ *
+ * Returns true if filtering should continue, false if the filter is bypassed
+ * for whatever reason.
  */
-EXPORT void obs_source_process_filter_begin(obs_source_t *filter,
+EXPORT bool obs_source_process_filter_begin(obs_source_t *filter,
 		enum gs_color_format format,
 		enum obs_allow_direct_render allow_direct);
 
@@ -953,6 +985,17 @@ EXPORT void obs_source_process_filter_begin(obs_source_t *filter,
  */
 EXPORT void obs_source_process_filter_end(obs_source_t *filter,
 		gs_effect_t *effect, uint32_t width, uint32_t height);
+
+/**
+ * Draws the filter with a specific technique.
+ *
+ * Before calling this function, first call obs_source_process_filter_begin and
+ * then set the effect parameters, and then call this function to finalize the
+ * filter.
+ */
+EXPORT void obs_source_process_filter_tech_end(obs_source_t *filter,
+		gs_effect_t *effect, uint32_t width, uint32_t height,
+		const char *tech_name);
 
 /** Skips the filter if the filter is invalid and cannot be rendered */
 EXPORT void obs_source_skip_video_filter(obs_source_t *filter);
@@ -1197,6 +1240,21 @@ EXPORT void obs_sceneitem_get_box_transform(const obs_sceneitem_t *item,
 
 EXPORT bool obs_sceneitem_visible(const obs_sceneitem_t *item);
 EXPORT bool obs_sceneitem_set_visible(obs_sceneitem_t *item, bool visible);
+
+struct obs_sceneitem_crop {
+	int left;
+	int top;
+	int right;
+	int bottom;
+};
+
+EXPORT void obs_sceneitem_set_crop(obs_sceneitem_t *item,
+		const struct obs_sceneitem_crop *crop);
+EXPORT void obs_sceneitem_get_crop(const obs_sceneitem_t *item,
+		struct obs_sceneitem_crop *crop);
+
+EXPORT void obs_sceneitem_defer_update_begin(obs_sceneitem_t *item);
+EXPORT void obs_sceneitem_defer_update_end(obs_sceneitem_t *item);
 
 
 /* ------------------------------------------------------------------------- */
@@ -1578,6 +1636,8 @@ EXPORT void *obs_encoder_get_type_data(obs_encoder_t *encoder);
 
 EXPORT const char *obs_encoder_get_id(const obs_encoder_t *encoder);
 
+EXPORT uint32_t obs_get_encoder_caps(const char *encoder_id);
+
 /** Duplicates an encoder packet */
 EXPORT void obs_duplicate_encoder_packet(struct encoder_packet *dst,
 		const struct encoder_packet *src);
@@ -1592,6 +1652,9 @@ EXPORT const char *obs_service_get_display_name(const char *id);
 
 EXPORT obs_service_t *obs_service_create(const char *id, const char *name,
 		obs_data_t *settings, obs_data_t *hotkey_data);
+
+EXPORT obs_service_t *obs_service_create_private(const char *id,
+		const char *name, obs_data_t *settings);
 
 /**
  * Adds/releases a reference to a service.  When the last reference is

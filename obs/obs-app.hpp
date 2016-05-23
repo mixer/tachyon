@@ -34,6 +34,8 @@
 std::string CurrentTimeString();
 std::string CurrentDateTimeString();
 std::string GenerateTimeDateFilename(const char *extension, bool noSpace=false);
+std::string GenerateSpecifiedFilename(const char *extension, bool noSpace,
+					const char *format);
 QObject *CreateShortcutFilter();
 
 struct BaseLexer {
@@ -145,9 +147,15 @@ inline const char *Str(const char *lookup) {return App()->GetString(lookup);}
 bool GetFileSafeName(const char *name, std::string &file);
 bool GetClosestUnusedFileName(std::string &path, const char *extension);
 
+bool WindowPositionValid(int x, int y);
+
 static inline int GetProfilePath(char *path, size_t size, const char *file)
 {
 	OBSMainWindow *window = reinterpret_cast<OBSMainWindow*>(
 			App()->GetMainWindow());
 	return window->GetProfilePath(path, size, file);
 }
+
+extern bool opt_start_streaming;
+extern bool opt_start_recording;
+extern std::string opt_starting_scene;
