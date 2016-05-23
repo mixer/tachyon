@@ -52,8 +52,8 @@ Function .onInit
 uninst:
   ReadRegStr $R1 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "InstallLocation"
   StrCmp $R1 "" 0 no_install_loc
-  StrCpy $R1 $INSTDIR
-  MessageBox MB_OK "$R0 and $R1"
+  StrCpy $R1 "${DEFAULT_INST_DIR}"
+;  MessageBox MB_OK "$R0 and $R1"
 
 no_install_loc:
   ClearErrors
@@ -855,7 +855,6 @@ Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\bin\64bit\tachyon64.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-  MessageBox MB_OK "$INSTDIR"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "InstallLocation" "$INSTDIR"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\64bit\tachyon64.exe"
