@@ -2,6 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Tachyon"
+!define DEFAULT_INST_DIR "$PROGRAMFILES\${PRODUCT_NAME}"
 !define PRODUCT_VERSION "1.1.0"
 !define PRODUCT_PUBLISHER "Beam Interactive"
 !define PRODUCT_WEB_SITE "http://beam.pro"
@@ -9,8 +10,8 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
-;SetCompressor /SOLID bzip2
-SetCompressor /SOLID Lzma
+SetCompressor /SOLID bzip2
+;SetCompressor /SOLID Lzma
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -36,6 +37,42 @@ Function launch_tachyon
          ExecShell "" "$SMPROGRAMS\Tachyon\Tachyon.lnk"
 FunctionEnd
 
+Function .onInit
+ 
+  ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "UninstallString"
+  StrCmp $R0 "" done
+ 
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PRODUCT_NAME} is already installed. $\n$\nClick `OK` to remove the \
+  previous version or `Cancel` to cancel this upgrade." \
+  IDOK uninst
+  Abort
+ 
+;Run the uninstaller
+uninst:
+  ReadRegStr $R1 ${PRODUCT_UNINST_ROOT_KEY} ${PRODUCT_UNINST_KEY} "InstallLocation"
+  StrCmp $R1 "" 0 no_install_loc
+  StrCpy $R1 $INSTDIR
+  MessageBox MB_OK "$R0 and $R1"
+
+no_install_loc:
+  ClearErrors
+  ExecWait '$R0 _?=$R1'
+
+  IfErrors 0 remove_uninstaller
+    ;You can either use Delete /REBOOTOK in the uninstaller or add some code
+    ;here to remove the uninstaller. Use a registry key to check
+    ;whether the user has chosen to uninstall. If you are using an uninstaller
+    ;components page, make sure all sections are uninstalled.
+  remove_uninstaller:
+  	Delete $R0
+	RMDir $R1
+	StrCpy $INSTDIR $R1
+ 
+done:
+ 
+FunctionEnd
+
 ; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
 
@@ -49,7 +86,7 @@ FunctionEnd
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "Tachyon_Installer_${PRODUCT_VERSION}.exe"
-InstallDir "$PROGRAMFILES\Tachyon"
+InstallDir "${DEFAULT_INST_DIR}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -189,7 +226,6 @@ SectionEnd
 Section "data" SEC04
   SetOutPath "$INSTDIR\data"
   SetOverwrite try
-  File "rundir\Release\data\.gitignore"
   SetOutPath "$INSTDIR\data\libobs"
   File "rundir\Release\data\libobs\bicubic_scale.effect"
   File "rundir\Release\data\libobs\bilinear_lowres_scale.effect"
@@ -819,6 +855,8 @@ Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\bin\64bit\tachyon64.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
+  MessageBox MB_OK "$INSTDIR"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "InstallLocation" "$INSTDIR"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\64bit\tachyon64.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
@@ -1435,7 +1473,6 @@ Section Uninstall
   Delete "$INSTDIR\data\libobs\default.effect"
   Delete "$INSTDIR\data\libobs\bilinear_lowres_scale.effect"
   Delete "$INSTDIR\data\libobs\bicubic_scale.effect"
-  Delete "$INSTDIR\data\.gitignore"
   Delete "$INSTDIR\obs-plugins\64bit\win-wasapi.dll"
   Delete "$INSTDIR\obs-plugins\64bit\win-mf.dll"
   Delete "$INSTDIR\obs-plugins\64bit\win-dshow.dll"
@@ -1550,6 +1587,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\64bit\avfilter-6.dll"
   Delete "$INSTDIR\bin\64bit\avdevice-57.dll"
   Delete "$INSTDIR\bin\64bit\avcodec-57.dll"
+  Delete "$INSTDIR\bin\64bit\debug.log"
 
   Delete "$SMPROGRAMS\Tachyon\Uninstall.lnk"
   Delete "$SMPROGRAMS\Tachyon\Website.lnk"
@@ -1559,15 +1597,20 @@ Section Uninstall
   RMDir "$SMPROGRAMS\Tachyon"
   RMDir "$INSTDIR\obs-plugins\64bit\locales"
   RMDir "$INSTDIR\obs-plugins\64bit"
+  RMDir "$INSTDIR\obs-plugins"
   RMDir "$INSTDIR\data\obs-studio\themes\Dark"
   RMDir "$INSTDIR\data\obs-studio\themes"
   RMDir "$INSTDIR\data\obs-studio\locale"
   RMDir "$INSTDIR\data\obs-studio\license"
   RMDir "$INSTDIR\data\obs-studio"
   RMDir "$INSTDIR\data\obs-plugins\win-wasapi\locale"
+  RMDir "$INSTDIR\data\obs-plugins\win-wasapi"
   RMDir "$INSTDIR\data\obs-plugins\win-mf\locale"
+  RMDir "$INSTDIR\data\obs-plugins\win-mf"
   RMDir "$INSTDIR\data\obs-plugins\win-dshow\locale"
+  RMDir "$INSTDIR\data\obs-plugins\win-dshow"
   RMDir "$INSTDIR\data\obs-plugins\win-decklink\locale"
+  RMDir "$INSTDIR\data\obs-plugins\win-decklink"
   RMDir "$INSTDIR\data\obs-plugins\win-capture\locale"
   RMDir "$INSTDIR\data\obs-plugins\win-capture"
   RMDir "$INSTDIR\data\obs-plugins\text-freetype2\locale"
@@ -1575,20 +1618,28 @@ Section Uninstall
   RMDir "$INSTDIR\data\obs-plugins\rtmp-services\locale"
   RMDir "$INSTDIR\data\obs-plugins\rtmp-services"
   RMDir "$INSTDIR\data\obs-plugins\obs-x264\locale"
+  RMDir "$INSTDIR\data\obs-plugins\obs-x264"
   RMDir "$INSTDIR\data\obs-plugins\obs-transitions\locale"
   RMDir "$INSTDIR\data\obs-plugins\obs-transitions"
   RMDir "$INSTDIR\data\obs-plugins\obs-qsv11\locale"
+  RMDir "$INSTDIR\data\obs-plugins\obs-qsv11"
   RMDir "$INSTDIR\data\obs-plugins\obs-outputs\locale"
+  RMDir "$INSTDIR\data\obs-plugins\obs-outputs"
   RMDir "$INSTDIR\data\obs-plugins\obs-filters\locale"
   RMDir "$INSTDIR\data\obs-plugins\obs-filters"
   RMDir "$INSTDIR\data\obs-plugins\obs-ffmpeg\locale"
   RMDir "$INSTDIR\data\obs-plugins\obs-ffmpeg"
   RMDir "$INSTDIR\data\obs-plugins\image-source\locale"
+  RMDir "$INSTDIR\data\obs-plugins\image-source"
   RMDir "$INSTDIR\data\obs-plugins\coreaudio-encoder\locale"
+  RMDir "$INSTDIR\data\obs-plugins\coreaudio-encoder"
+  RMDir "$INSTDIR\data\obs-plugins"
   RMDir "$INSTDIR\data\libobs"
   RMDir "$INSTDIR\data"
   RMDir "$INSTDIR\bin\64bit\platforms"
   RMDir "$INSTDIR\bin\64bit"
+  RMDir "$INSTDIR\bin"
+  RMDir "$INSTDIR"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
