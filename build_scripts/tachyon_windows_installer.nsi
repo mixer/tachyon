@@ -10,8 +10,8 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
-SetCompressor /SOLID bzip2
-;SetCompressor /SOLID Lzma
+;SetCompressor /SOLID bzip2
+SetCompressor /SOLID Lzma
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
