@@ -26,7 +26,11 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
+#ifdef OS_WINDOWS
 #include <ftl.h>
+#else
+#include <ftl/ftl.h>
+#endif
 
 #include "obs-ffmpeg-formats.h"
 #include "closest-pixel-format.h"

@@ -5,6 +5,9 @@ INSTALL_PREFIX='/opt/tachyon'
 rm -fr $TEMP_INSTALL_PREFIX
 mkdir -p $TEMP_INSTALL_PREFIX
 export PKG_CONFIG_PATH+=:$INSTALL_PREFIX/lib/pkgconfig/
+cd ..
+pushd .
+cd ..
 ##################
 #opus#
 ##################
@@ -62,17 +65,16 @@ cd ..
 ##########################
 #Tachyon
 ##########################
-#sudo apt-get install libxcb-xinerama0
-#sudo apt-get install libqt5x11extras5
-git clone https://github.com/WatchBeam/ftl-studio.git
-cd ftl-studio
-git checkout ftl-ffmpeg
+popd
 mkdir build
 cd build
 cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
-make -j4
+make -j$(grep -c '^processor' /proc/cpuinfo)
 make install DESTDIR=$TEMP_INSTALL_PREFIX
 cd ../.. 
+##################################
+# Browser
+##################################
 git clone https://github.com/bazukas/obs-qtwebkit.git
 cd obs-qtwebkit
 make
