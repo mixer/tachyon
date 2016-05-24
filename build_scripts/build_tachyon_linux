@@ -1,7 +1,30 @@
 #!/bin/bash
-set -e
+#arg1: folder to clone into
+#arg2 git repo
+#arg3: tag/branch to checkout
+function getrepo {
+  if [ ! -d $1 ];
+  then
+    mkdir $1
+  fi
+  cd $1
+  git pull
+  if [ $? -eq 128 ];
+  then
+# repo doesnt exist
+    git clone $2 .
+  fi
+  git checkout $3
+}
+
 
 do_browser=false;
+do_opus=false;
+do_vp8=false;
+do_ffmpeg=false;
+do_ftlsdk=false;
+do_x264=false;
+do_tachyon=false;
 
 while getopts ":b" opt; do
   case $opt in
@@ -13,68 +36,131 @@ while getopts ":b" opt; do
       ;;
   esac
 done
-TEMP_INSTALL_PREFIX='/tmp/tachyon'
 INSTALL_PREFIX='/opt/tachyon'
-rm -fr $TEMP_INSTALL_PREFIX
-mkdir -p $TEMP_INSTALL_PREFIX
-export PKG_CONFIG_PATH+=:$TEMP_INSTALL_PREFIX$INSTALL_PREFIX/lib/pkgconfig/
+echo "Installing Tachyon and it's dependancies to $INSTALL_PREFIX"
+if [ -d "$INSTALL_PREFIX" ]; then
+  echo -e "$INSTALL_PREFIX already exists.  Is it okay to completely remove this folder [Y/n]? "
+  read response
+  if [ $response == 'Y' ]
+  then
+    rm -fr $INSTALL_PREFIX
+  fi
+fi
+mkdir -p $INSTALL_PREFIX
+export PKG_CONFIG_PATH=$INSTALL_PREFIX/lib/pkgconfig/:$PKG_CONFIG_PATH
 cd ..
 pushd .
 cd ..
 ##################
 #opus#
 ##################
-git clone https://git.xiph.org/opus.git
-cd opus
-git checkout ftl-ffmpeg
-git checkout v1.1.2
+getrepo opus https://git.xiph.org/opus.git v1.1.2
 ./autogen.sh
 ./configure --prefix=$INSTALL_PREFIX
 make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ..
 #######################################
 #VP8###
 #######################################
-git clone https://chromium.googlesource.com/webm/libvpx
-cd libvpx
-git checkout v1.5.0
+getrepo libvpx https://chromium.googlesource.com/webm/libvpx v1.5.0
 mkdir build-libvpx
 cd    build-libvpx
 ../configure --prefix=$INSTALL_PREFIX --enable-shared --disable-static --disable-vp9 --disable-vp10
 make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ../..
 #######################################
 ####ffmpeg with opus and vp8
 ########################################
-git clone https://git.ffmpeg.org/ffmpeg.git
-cd ffmpeg
-git checkout n3.0.2
+getrepo ffmpeg https://git.ffmpeg.org/ffmpeg.git n3.0.2
 ./configure --enable-shared --enable-libvpx --enable-libopus --prefix=$INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "ffmpeg configure failed, exiting"
+  exit
+fi
 make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ..
 #######################################
 #ftl-sdk
 #######################################
-git clone https://github.com/WatchBeam/ftl-sdk.git
-cd ftl-sdk
+getrepo ftl-sdk https://github.com/WatchBeam/ftl-sdk.git HEAD
 mkdir build
 cd build
 cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+if [ $? -ne 0 ];
+then
+  echo "cmake failure or ftl-sdk, exiting"
+  exit
+fi
 make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ../..
+
 ##########################
 #libx264
 ##########################
-git clone http://git.videolan.org/git/x264.git
-cd x264 
-git checkout 2102de2
+getrepo x264 http://git.videolan.org/git/x264.git 2102de2 
 ./configure --enable-shared --prefix=$INSTALL_PREFIX
-make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "cmake failure or ftl-sdk, exiting"
+  exit
+fi
+make -j$(grep -c '^processor' /proc/cpuinfo)
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ..
 ##########################
 #Tachyon
@@ -83,17 +169,32 @@ popd
 mkdir build
 cd build
 cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+if [ $? -ne 0 ];
+then
+  echo "cmake failure or ftl-sdk, exiting"
+  exit
+fi
 make -j$(grep -c '^processor' /proc/cpuinfo)
-make install DESTDIR=$TEMP_INSTALL_PREFIX
+if [ $? -ne 0 ];
+then
+  echo "Make failed, exiting"
+  exit
+fi
+make install
+if [ $? -ne 0 ];
+then
+  echo "Make Install failed, exiting"
+  exit
+fi
 cd ../.. 
 ##################################
 # Browser
 ##################################
 if [ $do_browser == true ]
 then
-  git clone https://github.com/bazukas/obs-qtwebkit.git
-  cd obs-qtwebkit
+  getrepo obs-qtwebkit https://github.com/bazukas/obs-qtwebkit.git HEAD
   make
-  make install DESTDIR=$TEMP_INSTALL_PREFIX
+  make install
   cd ..
 fi
+
