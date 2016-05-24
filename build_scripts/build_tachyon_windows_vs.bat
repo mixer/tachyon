@@ -2,7 +2,7 @@ REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
 SET obs_version=1.1.0
 SET cef_binary_dir=C:\beam\cef_binary
-SET coredeps=C:\beam\dependencies2015
+SET coredeps=C:\beam\tachyon_deps
 SET QTDIR64=C:\Qt\5.6\msvc2015_64
 SET PATH=%PATH%;C:\Program Files (x86)\MSBuild\14.0\Bin
 SET DepsPath64=%coredeps%\win64
