@@ -1,10 +1,23 @@
 #!/bin/bash
 set -e
+
+do_browser=false;
+
+while getopts ":b" opt; do
+  case $opt in
+    b)
+      do_browser=true;
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
 TEMP_INSTALL_PREFIX='/tmp/tachyon'
 INSTALL_PREFIX='/opt/tachyon'
 rm -fr $TEMP_INSTALL_PREFIX
 mkdir -p $TEMP_INSTALL_PREFIX
-export PKG_CONFIG_PATH+=:$INSTALL_PREFIX/lib/pkgconfig/
+export PKG_CONFIG_PATH+=:$TEMP_INSTALL_PREFIX$INSTALL_PREFIX/lib/pkgconfig/
 cd ..
 pushd .
 cd ..
@@ -13,6 +26,7 @@ cd ..
 ##################
 git clone https://git.xiph.org/opus.git
 cd opus
+git checkout ftl-ffmpeg
 git checkout v1.1.2
 ./autogen.sh
 ./configure --prefix=$INSTALL_PREFIX
@@ -75,8 +89,11 @@ cd ../..
 ##################################
 # Browser
 ##################################
-git clone https://github.com/bazukas/obs-qtwebkit.git
-cd obs-qtwebkit
-make
-make install DESTDIR=$TEMP_INSTALL_PREFIX
-cd ..
+if [ $do_browser == true ]
+then
+  git clone https://github.com/bazukas/obs-qtwebkit.git
+  cd obs-qtwebkit
+  make
+  make install DESTDIR=$TEMP_INSTALL_PREFIX
+  cd ..
+fi
