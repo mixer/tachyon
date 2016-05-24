@@ -16,15 +16,14 @@ function getrepo {
   fi
   git checkout $3
 }
-
-
+obs_version=1.1.0
 do_browser=false;
-do_opus=false;
-do_vp8=false;
-do_ffmpeg=false;
-do_ftlsdk=false;
-do_x264=false;
-do_tachyon=false;
+#do_opus=false;
+#do_vp8=false;
+#do_ffmpeg=false;
+#do_ftlsdk=false;
+#do_x264=false;
+#do_tachyon=false;
 
 while getopts ":b" opt; do
   case $opt in
@@ -168,7 +167,7 @@ cd ..
 popd
 mkdir build
 cd build
-cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX ..
+cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DOBS_VERSION_OVERRIDE=$obs_version ..
 if [ $? -ne 0 ];
 then
   echo "cmake failure or ftl-sdk, exiting"
