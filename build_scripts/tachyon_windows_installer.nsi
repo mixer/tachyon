@@ -18,7 +18,7 @@ SetCompressor /SOLID Lzma
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "c:\beam\ball.ico"
+!define MUI_ICON "ball.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ; Welcome page
