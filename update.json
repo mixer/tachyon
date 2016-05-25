@@ -1,10 +1,10 @@
 {
 	"windows": {
 		"year": 2016,
-		"month": 4,
-		"day": 4,
+		"month": 5,
+		"day": 24,
 		"patch": 0,
-		"download": "https://github.com/WatchBeam/ftl-studio/releases/tag/2016.04.04"
+		"download": "https://github.com/WatchBeam/tachyon/releases/tag/v1.1.0"
 	},
 	"mac": {
 		"major": 0,
