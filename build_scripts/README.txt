@@ -10,7 +10,7 @@ dependancies
 
 The build script expects a few things:
 *Visual Studio 2015 (Community is perfectly fine): https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx
-*MSBuild tool: https://www.microsoft.com/en-us/download/details.aspx?id=4815
+*MSBuild tool: https://www.microsoft.com/en-us/download/details.aspx?id=48159
 *CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://bitbucket.org/chromiumembedded/cef
 *additional dependancies including vp8, opus, ffmpeg, curl, (and a few others) to be installed C:\beam\tachyon_deps : https://github.com/WatchBeam/tachyon/releases/download/v1.1.0/tachyon_deps.zip
 *cmake https://cmake.org/
