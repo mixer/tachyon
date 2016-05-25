@@ -1836,7 +1836,7 @@ void OBSBasic::CheckForUpdates()
 	}
 
 	RemoteTextThread *thread = new RemoteTextThread(
-			"https://raw.githubusercontent.com/WatchBeam/ftl-studio/ftl-ffmpeg/update.json");
+			"https://raw.githubusercontent.com/WatchBeam/tachyon/ftl-ffmpeg/update.json");
 	updateCheckThread = thread;
 	connect(thread, &RemoteTextThread::Result,
 			this, &OBSBasic::updateFileFinished);

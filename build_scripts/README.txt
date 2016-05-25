@@ -10,8 +10,10 @@ dependancies
 
 The build script expects a few things:
 *Visual Studio 2015 (Community is perfectly fine): https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx
+**IMPORTANT: make sure during the install the following is checked: under features->programming languages->visual c++->common tools for visual c++ 2015
+**IMPORTANT: if you forgot to do this during the install you can go to add/remove programs and select modify and enable it the same as above
 *MSBuild tool: https://www.microsoft.com/en-us/download/details.aspx?id=48159
-*CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://bitbucket.org/chromiumembedded/cef
+*CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://cefbuilds.com/ Branch 2623 Windows 64bit (CEF 3.2623.1401.gb90a3be (123MB)) 
 *additional dependancies including vp8, opus, ffmpeg, curl, (and a few others) to be installed C:\beam\tachyon_deps : https://github.com/WatchBeam/tachyon/releases/download/v1.1.0/tachyon_deps.zip
 *cmake https://cmake.org/
 *QT 5.6 https://www.qt.io/download/
@@ -24,13 +26,12 @@ cd tachyon
 git checkout ftl-ffmpeg
 cd build_scripts
 build_tachyon_windows_vs.bat
-*once complete everything should be located in ftl-studio\build_scripts\rundir\Release
+*once complete everything should be located in tachyon\build_scripts\rundir\Release
 
 Installer
 #########
 *after compleleting the above step run:
-SET PATH=%PATH%;c:\Program Files (x86)\NSIS
-makensis tachyon_windows_installer.nsi
+create_tachyon_installer.bat
 
 Tachyon_Installer_1.1.0.exe will be placed in the same folder
 
