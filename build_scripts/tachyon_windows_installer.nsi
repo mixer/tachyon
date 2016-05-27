@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Tachyon"
 !define DEFAULT_INST_DIR "$PROGRAMFILES\${PRODUCT_NAME}"
-!define PRODUCT_VERSION "1.1.0"
+!define PRODUCT_VERSION "1.1.1"
 !define PRODUCT_PUBLISHER "Beam Interactive"
 !define PRODUCT_WEB_SITE "http://beam.pro"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\tachyon64.exe"
@@ -202,7 +202,7 @@ Section "browser" SEC02
   File "rundir\Release\obs-plugins\64bit\natives_blob.bin"
   File "rundir\Release\obs-plugins\64bit\obs-browser.dll"
   File "rundir\Release\obs-plugins\64bit\snapshot_blob.bin"
-  File "rundir\Release\obs-plugins\64bit\widevinecdmadapter.dll"
+;  File "rundir\Release\obs-plugins\64bit\widevinecdmadapter.dll"
 SectionEnd
 
 Section "plugins" SEC03
@@ -1487,7 +1487,7 @@ Section Uninstall
   Delete "$INSTDIR\obs-plugins\64bit\obs-ffmpeg.dll"
   Delete "$INSTDIR\obs-plugins\64bit\image-source.dll"
   Delete "$INSTDIR\obs-plugins\64bit\coreaudio-encoder.dll"
-  Delete "$INSTDIR\obs-plugins\64bit\widevinecdmadapter.dll"
+;  Delete "$INSTDIR\obs-plugins\64bit\widevinecdmadapter.dll"
   Delete "$INSTDIR\obs-plugins\64bit\snapshot_blob.bin"
   Delete "$INSTDIR\obs-plugins\64bit\obs-browser.dll"
   Delete "$INSTDIR\obs-plugins\64bit\natives_blob.bin"

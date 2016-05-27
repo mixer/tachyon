@@ -16,7 +16,7 @@ The build script expects a few things:
 *CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://cefbuilds.com/ Branch 2623 Windows 64bit (CEF 3.2623.1401.gb90a3be (123MB)) 
 *additional dependancies including vp8, opus, ffmpeg, curl, (and a few others) to be installed C:\beam\tachyon_deps : https://github.com/WatchBeam/tachyon/releases/download/v1.1.0/tachyon_deps.zip
 *cmake https://cmake.org/
-*QT 5.6 https://www.qt.io/download/
+*QT 5.6 https://www.qt.io/download/ (select the open source version)
 *NSIS (only needed to build the installer package) http://nsis.sourceforge.net/
 
 building:
