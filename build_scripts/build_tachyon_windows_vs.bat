@@ -1,7 +1,7 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
 SET build_config=Release
-SET obs_version=1.1.0
+SET obs_version=1.1.2
 SET cef_binary_dir=C:\beam\cef_binary
 SET coredeps=C:\beam\tachyon_deps
 SET QTDIR64=C:\Qt\5.6\msvc2015_64
@@ -51,7 +51,7 @@ xcopy %cef_binary_dir%\Resources\* rundir\%build_config%\obs-plugins\64bit\ /s /
 copy %cef_binary_dir%\%build_config%\d3dcompiler_43.dll rundir\%build_config%\obs-plugins\64bit\
 copy %cef_binary_dir%\%build_config%\d3dcompiler_47.dll rundir\%build_config%\obs-plugins\64bit\
 copy %cef_binary_dir%\%build_config%\libcef.dll rundir\%build_config%\obs-plugins\64bit\
-copy %cef_binary_dir%\%build_config%\widevinecdmadapter.dll rundir\%build_config%\obs-plugins\64bit\
+REM copy %cef_binary_dir%\%build_config%\widevinecdmadapter.dll rundir\%build_config%\obs-plugins\64bit\
 copy %cef_binary_dir%\%build_config%\natives_blob.bin rundir\%build_config%\obs-plugins\64bit\
 copy %cef_binary_dir%\%build_config%\snapshot_blob.bin rundir\%build_config%\obs-plugins\64bit\
 copy %coredeps%\win64\bin\postproc-54.dll rundir\%build_config%\bin\64bit
