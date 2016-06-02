@@ -1,5 +1,6 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
+SET build_config=Release
 SET obs_version=1.1.0
 SET cef_binary_dir=C:\beam\cef_binary
 SET coredeps=C:\beam\tachyon_deps
@@ -26,9 +27,9 @@ REM cd cef_binary
 mkdir build
 cd build
 cmake -G "Visual Studio 14 2015 Win64" ..
-msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj || exit /b
+msbuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.vcxproj || exit /b
 REM current CEF plugin expects this one folder down
-copy libcef_dll\Release\libcef_dll_wrapper.lib libcef_dll\
+copy libcef_dll\%build_config%\libcef_dll_wrapper.lib libcef_dll\
 REM /machine is set incorrectly should be x64
 REM cd..\..
 popd
@@ -39,18 +40,18 @@ mkdir build
 cd build
 cmake -G "Visual Studio 14 2015 Win64" ..
 REM Microsoft Build Tools 2015 https://www.microsoft.com/en-us/download/details.aspx?id=4815
-call msbuild /t:Rebuild /p:Configuration=Release,Platform=x64 ftl.vcxproj || exit /b
-SET ftl_lib_dir=%cd%\Release\ftl.lib
+call msbuild /t:Rebuild /p:Configuration=%build_config%,Platform=x64 ftl.vcxproj || exit /b
+SET ftl_lib_dir=%cd%\%build_config%\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
 cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
-call msbuild /p:Configuration=Release,Platform=x64 ALL_BUILD.vcxproj || exit /b
+call msbuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.vcxproj || exit /b
 echo "Copying Browser plugin"
-xcopy %cef_binary_dir%\Resources\* rundir\Release\obs-plugins\64bit\ /s /e /y
-copy %cef_binary_dir%\Release\d3dcompiler_43.dll rundir\Release\obs-plugins\64bit\
-copy %cef_binary_dir%\Release\d3dcompiler_47.dll rundir\Release\obs-plugins\64bit\
-copy %cef_binary_dir%\Release\libcef.dll rundir\Release\obs-plugins\64bit\
-copy %cef_binary_dir%\Release\widevinecdmadapter.dll rundir\Release\obs-plugins\64bit\
-copy %cef_binary_dir%\Release\natives_blob.bin rundir\Release\obs-plugins\64bit\
-copy %cef_binary_dir%\Release\snapshot_blob.bin rundir\Release\obs-plugins\64bit\
-copy %coredeps%\win64\bin\postproc-54.dll rundir\Release\bin\64bit
+xcopy %cef_binary_dir%\Resources\* rundir\%build_config%\obs-plugins\64bit\ /s /e /y
+copy %cef_binary_dir%\%build_config%\d3dcompiler_43.dll rundir\%build_config%\obs-plugins\64bit\
+copy %cef_binary_dir%\%build_config%\d3dcompiler_47.dll rundir\%build_config%\obs-plugins\64bit\
+copy %cef_binary_dir%\%build_config%\libcef.dll rundir\%build_config%\obs-plugins\64bit\
+copy %cef_binary_dir%\%build_config%\widevinecdmadapter.dll rundir\%build_config%\obs-plugins\64bit\
+copy %cef_binary_dir%\%build_config%\natives_blob.bin rundir\%build_config%\obs-plugins\64bit\
+copy %cef_binary_dir%\%build_config%\snapshot_blob.bin rundir\%build_config%\obs-plugins\64bit\
+copy %coredeps%\win64\bin\postproc-54.dll rundir\%build_config%\bin\64bit
