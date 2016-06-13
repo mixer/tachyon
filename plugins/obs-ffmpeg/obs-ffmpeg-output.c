@@ -32,6 +32,11 @@
 #include <ftl/ftl.h>
 #endif
 
+#include <windows.h>
+#include <process.h>
+#include <Shellapi.h>
+//#include <Processthreadsapi.h>
+
 #include "obs-ffmpeg-formats.h"
 #include "closest-pixel-format.h"
 #include "obs-ffmpeg-compat.h"
@@ -64,6 +69,7 @@ struct ffmpeg_cfg {
 	char						stream_key[2048];
 	uint32_t					audio_ssrc;
 	uint32_t					video_ssrc;
+
 };
 
 struct ffmpeg_data {
@@ -92,7 +98,7 @@ struct ffmpeg_data {
 	AVFrame            *aframe;
 
 	struct ffmpeg_cfg  config;
-
+	
 	bool               initialized;
 };
 
@@ -116,6 +122,10 @@ struct ffmpeg_output {
 	ftl_stream_configuration_t* stream_config;
 	ftl_stream_video_component_t* video_component;
 	ftl_stream_audio_component_t* audio_component;
+	
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;		
+  SHELLEXECUTEINFO ShExecInfo;
 
 };
 
@@ -1131,6 +1141,7 @@ static int try_connect(struct ffmpeg_output *output)
 	obs_data_t *settings;
 	bool success;
 	int ret;
+	wchar_t ftl_ingest_arg[200];
 
 	int len;
 	int got_streamkey = 0;
@@ -1164,7 +1175,38 @@ static int try_connect(struct ffmpeg_output *output)
 
 	/* Glue together the ingest URL */
 	int size = 0;
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
+	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
+	//snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), L"-rtpingestaddr=%hs:8082", config.ingest_location);
+	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
+
+
+  //_spawnl( _P_DETACH, "ftl-express.exe", "ftl-express.exe", ftl_ingest_arg, NULL );	
+
+/*
+	ZeroMemory( &output->si, sizeof(output->si) );
+	output->si.cb = sizeof(output->si);
+	ZeroMemory( &output->pi, sizeof(output->pi) );
+	if( !CreateProcess(NULL, ftl_ingest_arg, NULL, NULL, FALSE, 0, NULL, NULL, &output->si, &output->pi) ) {
+		blog(LOG_WARNING, "create process failed with %d\n", GetLastError());
+	} else {
+		blog(LOG_WARNING, "CreateProcess didnt return an error\n");
+	}
+*/	
+
+  ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
+	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
+	output->ShExecInfo.hwnd = NULL;
+	output->ShExecInfo.lpVerb = L"open";
+	output->ShExecInfo.lpFile = L"ftl-express.exe";	
+	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
+	output->ShExecInfo.lpDirectory = NULL;
+	output->ShExecInfo.nShow = SW_SHOW;//SW_HIDE
+	output->ShExecInfo.hInstApp = NULL;	
+	ShellExecuteEx(&output->ShExecInfo);
+
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;
@@ -1181,7 +1223,7 @@ static int try_connect(struct ffmpeg_output *output)
 	}
 
 	if (config.format == AV_PIX_FMT_NONE) {
-		blog(LOG_DEBUG, "invalid pixel format used for FFmpeg output");
+		blog(LOG_WARNING, "invalid pixel format used for FFmpeg output");
 		return OBS_OUTPUT_ERROR;
 	}
 
@@ -1311,6 +1353,10 @@ static void ffmpeg_output_stop(void *data)
 		ftl_deactivate_stream(output->stream_config);
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
+		blog(LOG_WARNING, "Terminating FTL express\n");
+		TerminateProcess(output->ShExecInfo.hProcess, 0);
+    CloseHandle( output->pi.hProcess );
+    CloseHandle( output->pi.hThread );		
 	}
 }
 
