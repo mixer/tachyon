@@ -1175,24 +1175,8 @@ static int try_connect(struct ffmpeg_output *output)
 
 	/* Glue together the ingest URL */
 	int size = 0;
-	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
-	//snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
 	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), L"-rtpingestaddr=%hs:8082", config.ingest_location);
 	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
-
-
-  //_spawnl( _P_DETACH, "ftl-express.exe", "ftl-express.exe", ftl_ingest_arg, NULL );	
-
-/*
-	ZeroMemory( &output->si, sizeof(output->si) );
-	output->si.cb = sizeof(output->si);
-	ZeroMemory( &output->pi, sizeof(output->pi) );
-	if( !CreateProcess(NULL, ftl_ingest_arg, NULL, NULL, FALSE, 0, NULL, NULL, &output->si, &output->pi) ) {
-		blog(LOG_WARNING, "create process failed with %d\n", GetLastError());
-	} else {
-		blog(LOG_WARNING, "CreateProcess didnt return an error\n");
-	}
-*/	
 
   ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -1202,10 +1186,12 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.lpFile = L"ftl-express.exe";	
 	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
 	output->ShExecInfo.lpDirectory = NULL;
-	output->ShExecInfo.nShow = SW_SHOW;//SW_HIDE
+	output->ShExecInfo.nShow = SW_HIDE; //SW_SHOW
 	output->ShExecInfo.hInstApp = NULL;	
 	ShellExecuteEx(&output->ShExecInfo);
+	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 
+	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
