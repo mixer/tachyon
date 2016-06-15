@@ -1,7 +1,7 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
 SET build_config=Release
-SET obs_version=1.2.0
+SET obs_version=1.2.1
 SET cef_binary_dir=C:\beam\cef_binary
 SET coredeps=C:\beam\tachyon_deps
 SET QTDIR64=C:\Qt\5.6\msvc2015_64

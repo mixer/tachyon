@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Tachyon"
 !define DEFAULT_INST_DIR "$PROGRAMFILES\${PRODUCT_NAME}"
-!define PRODUCT_VERSION "1.2.0"
+!define PRODUCT_VERSION "1.2.1"
 !define PRODUCT_PUBLISHER "Beam Interactive"
 !define PRODUCT_WEB_SITE "http://beam.pro"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\tachyon64.exe"
@@ -1563,6 +1563,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\64bit\Qt5Widgets.dll"
   Delete "$INSTDIR\bin\64bit\Qt5Gui.dll"
   Delete "$INSTDIR\bin\64bit\ftl-express.exe"
+  Delete "$INSTDIR\bin\64bit\ftl.log"  
   Delete "$INSTDIR\bin\64bit\Qt5Core.dll"
   Delete "$INSTDIR\bin\64bit\postproc-54.dll"
   Delete "$INSTDIR\bin\64bit\platforms\qwindows.dll"

@@ -1186,10 +1186,10 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.lpFile = L"ftl-express.exe";	
 	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
 	output->ShExecInfo.lpDirectory = NULL;
-	output->ShExecInfo.nShow = SW_HIDE; //SW_SHOW
+	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
 	output->ShExecInfo.hInstApp = NULL;	
 	ShellExecuteEx(&output->ShExecInfo);
-	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
+	//SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
@@ -1339,8 +1339,28 @@ static void ffmpeg_output_stop(void *data)
 		ftl_deactivate_stream(output->stream_config);
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
-		blog(LOG_WARNING, "Terminating FTL express\n");
-		TerminateProcess(output->ShExecInfo.hProcess, 0);
+		blog(LOG_WARNING, "Closing FTL express\n");
+		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);		
+		if (!AttachConsole(pid)) {
+			  DWORD error = GetLastError();
+			  blog(LOG_WARNING, "Failed to attach to console of pid %d -- error was %d\n", pid, error);
+				TerminateProcess(output->ShExecInfo.hProcess, 0);
+		} else {
+			SetConsoleCtrlHandler(NULL, true);
+			// Sent Ctrl-C to the attached console
+			GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+			
+			DWORD state;
+			
+			if( (state = WaitForSingleObject(output->ShExecInfo.hProcess, 5000)) == WAIT_TIMEOUT) {
+				blog(LOG_WARNING, "Gave up waiting for process to exit...forcible terminating\n");
+				TerminateProcess(output->ShExecInfo.hProcess, 0);
+			} 
+			// Re-enable Ctrl-C handling or any subsequently started programs will inherit the disabled state.
+			SetConsoleCtrlHandler(NULL, false);		
+			FreeConsole();
+		}
+		
     CloseHandle( output->pi.hProcess );
     CloseHandle( output->pi.hThread );		
 	}
