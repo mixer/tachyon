@@ -1189,7 +1189,7 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
 	output->ShExecInfo.hInstApp = NULL;	
 	ShellExecuteEx(&output->ShExecInfo);
-	//SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
+	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
