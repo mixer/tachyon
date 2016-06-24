@@ -13,11 +13,13 @@ The build script expects a few things:
 **IMPORTANT: make sure during the install the following is checked: under features->programming languages->visual c++->common tools for visual c++ 2015
 **IMPORTANT: if you forgot to do this during the install you can go to add/remove programs and select modify and enable it the same as above
 *MSBuild tool: https://www.microsoft.com/en-us/download/details.aspx?id=48159
-*CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://cefbuilds.com/ Branch 2623 Windows 64bit (CEF 3.2623.1401.gb90a3be (123MB)) 
+#*CEF Browser plugin - you can change the install location but the script expect it in c:\beam\cef_binary : https://cefbuilds.com/ Branch 2623 Windows 64bit (CEF 3.2623.1401.gb90a3be (123MB)) 
+CEF Browser plugin - https://github.com/kc5nra/obs-browser/releases/ -- using release 1.22 - should be placed in C:\beam\obs-browser-1.22
 *additional dependancies including vp8, opus, ffmpeg, curl, (and a few others) to be installed C:\beam\tachyon_deps : https://github.com/WatchBeam/tachyon/releases/download/v1.1.0/tachyon_deps.zip
 *cmake https://cmake.org/
 *QT 5.6 https://www.qt.io/download/ (select the open source version)
 *NSIS (only needed to build the installer package) http://nsis.sourceforge.net/
+*GoLang https://golang.org/dl/
 
 building:
 #########

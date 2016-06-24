@@ -145,6 +145,8 @@ Section "browser" SEC02
   File "rundir\Release\obs-plugins\64bit\devtools_resources.pak"
   File "rundir\Release\obs-plugins\64bit\icudtl.dat"
   File "rundir\Release\obs-plugins\64bit\libcef.dll"
+  File "rundir\Release\obs-plugins\64bit\libGLESv2.dll"
+  File "rundir\Release\obs-plugins\64bit\libEGL.dll"
   SetOutPath "$INSTDIR\obs-plugins\64bit\locales"
   File "rundir\Release\obs-plugins\64bit\locales\am.pak"
   File "rundir\Release\obs-plugins\64bit\locales\ar.pak"
