@@ -32,10 +32,18 @@
 #include <ftl/ftl.h>
 #endif
 
+#ifdef _WIN32
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
-//#include <Processthreadsapi.h>
+#elif __APPLE__
+
+#else
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include <wchar.h>
+#endif
 
 #include "obs-ffmpeg-formats.h"
 #include "closest-pixel-format.h"
@@ -123,10 +131,15 @@ struct ffmpeg_output {
 	ftl_stream_video_component_t* video_component;
 	ftl_stream_audio_component_t* audio_component;
 	
+#ifdef _WIN32	
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;		
   SHELLEXECUTEINFO ShExecInfo;
+#elif __APPLE__
 
+#else
+	pid_t ftl_express_pid;
+#endif
 };
 
 /* ------------------------------------------------------------------------- */
@@ -1176,8 +1189,9 @@ static int try_connect(struct ffmpeg_output *output)
 	/* Glue together the ingest URL */
 	int size = 0;
 	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), L"-rtpingestaddr=%hs:8082", config.ingest_location);
-	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
+	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
 
+#ifdef _WIN32
   ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
@@ -1190,6 +1204,24 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.hInstApp = NULL;	
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
+#elif __APPLE__
+
+#else
+/* print error message if fork() fails */
+   if((output->ftl_express_pid = fork()) < 0 )
+   {
+      blog(LOG_ERROR, "call to fork failed\n");
+      return OBS_OUTPUT_ERROR;
+   }
+
+   if(output->ftl_express_pid == 0)
+   { 
+		  execl("ftl-express", "ftl-express", ftl_ingest_arg);
+
+      blog(LOG_ERROR, "failed to start ftl-express\n");
+      exit(1);
+   }
+#endif
 
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
 	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
@@ -1340,6 +1372,7 @@ static void ffmpeg_output_stop(void *data)
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
 		blog(LOG_WARNING, "Closing FTL express\n");
+#ifdef _WIN32	
 		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);		
 		if (!AttachConsole(pid)) {
 			  DWORD error = GetLastError();
@@ -1363,6 +1396,15 @@ static void ffmpeg_output_stop(void *data)
 		
     CloseHandle( output->pi.hProcess );
     CloseHandle( output->pi.hThread );		
+#elif __APPLE__
+
+#else
+/* print error message if fork() fails */
+	/*send Ctrl+C to ftl express*/
+	blog(LOG_WARNING, "Sending Ctrl+C to Ftl-express pid %d\n", output->ftl_express_pid );
+	kill(output->ftl_express_pid, SIGINT)
+#endif		
+
 	}
 }
 
