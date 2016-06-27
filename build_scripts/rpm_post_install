@@ -1,4 +1,5 @@
 ln -s /opt/tachyon/bin/tachyon /usr/bin/tachyon
+ln -s /opt/tachyon/bin/ftl-express /usr/bin/ftl-express
 bash -c 'echo "/opt/tachyon/lib" > /etc/ld.so.conf.d/tachyon.conf'
 ldconfig
 
