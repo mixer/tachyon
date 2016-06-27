@@ -16,7 +16,7 @@ function getrepo {
   fi
   git checkout $3
 }
-obs_version=1.1.0
+obs_version=1.2.6
 do_browser=false;
 #do_opus=false;
 #do_vp8=false;
@@ -161,6 +161,16 @@ then
   exit
 fi
 cd ..
+##########################
+#Ftl-Express
+##########################
+echo "Building FTL-Express"
+pushd .
+getrepo ftl-express https://github.com/WatchBeam/ftl-express.git HEAD
+go get
+go build
+cp ftl-express $INSTALL_PREFIX/bin
+popd
 ##########################
 #Tachyon
 ##########################

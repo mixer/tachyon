@@ -1154,7 +1154,11 @@ static int try_connect(struct ffmpeg_output *output)
 	obs_data_t *settings;
 	bool success;
 	int ret;
+#ifdef _WIN32
 	wchar_t ftl_ingest_arg[200];
+#else 
+	char ftl_ingest_arg[200];
+#endif
 
 	int len;
 	int got_streamkey = 0;
@@ -1188,11 +1192,11 @@ static int try_connect(struct ffmpeg_output *output)
 
 	/* Glue together the ingest URL */
 	int size = 0;
-	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), L"-rtpingestaddr=%hs:8082", config.ingest_location);
-	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
 
 #ifdef _WIN32
-  ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_location);
+	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
+  	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
 	output->ShExecInfo.hwnd = NULL;
@@ -1207,20 +1211,24 @@ static int try_connect(struct ffmpeg_output *output)
 #elif __APPLE__
 
 #else
-/* print error message if fork() fails */
-   if((output->ftl_express_pid = fork()) < 0 )
-   {
-      blog(LOG_ERROR, "call to fork failed\n");
-      return OBS_OUTPUT_ERROR;
-   }
+	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
+	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
+	/* print error message if fork() fails */
+	blog(LOG_WARNING, "Forking Process\n");
 
-   if(output->ftl_express_pid == 0)
-   { 
-		  execl("ftl-express", "ftl-express", ftl_ingest_arg);
+	if((output->ftl_express_pid = fork()) < 0 )
+	{
+		blog(LOG_ERROR, "call to fork failed\n");
+		return OBS_OUTPUT_ERROR;
+	}
 
-      blog(LOG_ERROR, "failed to start ftl-express\n");
-      exit(1);
-   }
+	if(output->ftl_express_pid == 0)
+	{ 
+		execlp("ftl-express", "ftl-express", ftl_ingest_arg, NULL);
+
+		blog(LOG_ERROR, "failed to start ftl-express\n");
+		exit(1);
+	}
 #endif
 
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
@@ -1402,7 +1410,7 @@ static void ffmpeg_output_stop(void *data)
 /* print error message if fork() fails */
 	/*send Ctrl+C to ftl express*/
 	blog(LOG_WARNING, "Sending Ctrl+C to Ftl-express pid %d\n", output->ftl_express_pid );
-	kill(output->ftl_express_pid, SIGINT)
+	kill(output->ftl_express_pid, SIGINT);
 #endif		
 
 	}
