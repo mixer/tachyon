@@ -1,7 +1,7 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
 SET build_config=Release
-SET obs_version=1.2.5
+SET obs_version=1.2.6
 SET cef_binary_dir=C:\beam\cef_binary
 SET cef_release_dir=C:\beam\obs-browser-1.22
 SET coredeps=C:\beam\tachyon_deps
@@ -47,6 +47,7 @@ cd ..\..
 call git clone https://github.com/WatchBeam/ftl-express.git
 cd ftl-express
 SET GOOS=windows
+go get
 go build
 copy ftl-express.exe %coredeps%\win64\bin\  || exit /b
 popd
