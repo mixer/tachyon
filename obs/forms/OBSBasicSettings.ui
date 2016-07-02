@@ -985,16 +985,11 @@
          <item row="0" column="1">
           <widget class="QComboBox" name="sampleRate">
            <property name="currentText">
-            <string notr="true">44.1khz</string>
+            <string notr="true">48khz</string>
            </property>
            <property name="currentIndex">
             <number>0</number>
            </property>
-           <item>
-            <property name="text">
-             <string>44.1khz</string>
-            </property>
-           </item>
            <item>
             <property name="text">
              <string>48khz</string>
@@ -1539,22 +1534,7 @@
                     <widget class="QComboBox" name="colorFormat">
                      <item>
                       <property name="text">
-                       <string notr="true">NV12</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
                        <string notr="true">I420</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>I444</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string notr="true">RGB</string>
                       </property>
                      </item>
                     </widget>
