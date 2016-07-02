@@ -498,16 +498,16 @@ void OBSBasicSettings::LoadFormats()
 
 void OBSBasicSettings::LoadIngestLocations() {
 	ui->advOutFTLIngestLoc->clear();
-	ui->advOutFTLIngestLoc->addItem("Australia (Melborne, Victoria)", QString("ingest-mel.beam.pro"));
-	ui->advOutFTLIngestLoc->addItem("Brazil (San Paulo)", QString("ingest-sao.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Australia (Melbourne, Victoria)", QString("ingest-mel.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Brazil (Sao Paulo)", QString("ingest-sao.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("Canada (Toronto, ON)", QString("ingest-tor.beam.pro"));
-	ui->advOutFTLIngestLoc->addItem("Europe (Amsterdam, Neterlands)", QString("ingest-ams.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Europe (Amsterdam, Netherlands)", QString("ingest-ams.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("Europe (London, United Kingdom)", QString("ingest-lon.beam.pro"));
-	ui->advOutFTLIngestLoc->addItem("Europe (Frankfurt)", QString("ingest-fra.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("Europe (Frankfurt, Germany)", QString("ingest-fra.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("United States (Dallas, TX)", QString("ingest-dal.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("United States (San Jose, CA)", QString("ingest-sjc.beam.pro"));
 	ui->advOutFTLIngestLoc->addItem("United States (Seattle, WA)", QString("ingest-sea.beam.pro"));
-	ui->advOutFTLIngestLoc->addItem("United States (Washington, DC)", QString 	("ingest-wdc.beam.pro"));
+	ui->advOutFTLIngestLoc->addItem("United States (Washington, DC)", QString("ingest-wdc.beam.pro"));
 
 	ui->advOutFTLIngestLoc->insertSeparator(100); // index of 100 forces it to the end
 	ui->advOutFTLIngestLoc->addItem("Other", QString(""));
