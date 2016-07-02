@@ -36,7 +36,7 @@
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
-#elif __APPLE__
+// #elif __APPLE__
 
 #else
 #include <sys/types.h>
@@ -106,7 +106,7 @@ struct ffmpeg_data {
 	AVFrame            *aframe;
 
 	struct ffmpeg_cfg  config;
-	
+
 	bool               initialized;
 };
 
@@ -130,12 +130,12 @@ struct ffmpeg_output {
 	ftl_stream_configuration_t* stream_config;
 	ftl_stream_video_component_t* video_component;
 	ftl_stream_audio_component_t* audio_component;
-	
-#ifdef _WIN32	
+
+#ifdef _WIN32
 	STARTUPINFO si;
-	PROCESS_INFORMATION pi;		
+	PROCESS_INFORMATION pi;
   SHELLEXECUTEINFO ShExecInfo;
-#elif __APPLE__
+// #elif __APPLE__
 
 #else
 	pid_t ftl_express_pid;
@@ -246,7 +246,7 @@ static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
 				avcodec_get_name(id));
 		return false;
 	}
-	
+
 	if (audio == 1) {
 		(*stream)->id = 0;
 	} else {
@@ -1156,7 +1156,7 @@ static int try_connect(struct ffmpeg_output *output)
 	int ret;
 #ifdef _WIN32
 	wchar_t ftl_ingest_arg[200];
-#else 
+#else
 	char ftl_ingest_arg[200];
 #endif
 
@@ -1201,14 +1201,14 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
 	output->ShExecInfo.hwnd = NULL;
 	output->ShExecInfo.lpVerb = L"open";
-	output->ShExecInfo.lpFile = L"ftl-express.exe";	
-	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
+	output->ShExecInfo.lpFile = L"ftl-express.exe";
+	output->ShExecInfo.lpParameters = ftl_ingest_arg;
 	output->ShExecInfo.lpDirectory = NULL;
 	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
-	output->ShExecInfo.hInstApp = NULL;	
+	output->ShExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
-#elif __APPLE__
+// #elif __APPLE__
 
 #else
 	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
@@ -1223,8 +1223,8 @@ static int try_connect(struct ffmpeg_output *output)
 	}
 
 	if(output->ftl_express_pid == 0)
-	{ 
-		execlp("ftl-express", "ftl-express", ftl_ingest_arg, NULL);
+	{
+		execlp("./ftl-express", "ftl-express", ftl_ingest_arg, NULL);
 
 		blog(LOG_ERROR, "failed to start ftl-express\n");
 		exit(1);
@@ -1380,8 +1380,8 @@ static void ffmpeg_output_stop(void *data)
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
 		blog(LOG_WARNING, "Closing FTL express\n");
-#ifdef _WIN32	
-		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);		
+#ifdef _WIN32
+		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);
 		if (!AttachConsole(pid)) {
 			  DWORD error = GetLastError();
 			  blog(LOG_WARNING, "Failed to attach to console of pid %d -- error was %d\n", pid, error);
@@ -1390,28 +1390,28 @@ static void ffmpeg_output_stop(void *data)
 			SetConsoleCtrlHandler(NULL, true);
 			// Sent Ctrl-C to the attached console
 			GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
-			
+
 			DWORD state;
-			
+
 			if( (state = WaitForSingleObject(output->ShExecInfo.hProcess, 5000)) == WAIT_TIMEOUT) {
 				blog(LOG_WARNING, "Gave up waiting for process to exit...forcible terminating\n");
 				TerminateProcess(output->ShExecInfo.hProcess, 0);
-			} 
+			}
 			// Re-enable Ctrl-C handling or any subsequently started programs will inherit the disabled state.
-			SetConsoleCtrlHandler(NULL, false);		
+			SetConsoleCtrlHandler(NULL, false);
 			FreeConsole();
 		}
-		
+
     CloseHandle( output->pi.hProcess );
-    CloseHandle( output->pi.hThread );		
-#elif __APPLE__
+    CloseHandle( output->pi.hThread );
+// #elif __APPLE__
 
 #else
 /* print error message if fork() fails */
 	/*send Ctrl+C to ftl express*/
 	blog(LOG_WARNING, "Sending Ctrl+C to Ftl-express pid %d\n", output->ftl_express_pid );
 	kill(output->ftl_express_pid, SIGINT);
-#endif		
+#endif
 
 	}
 }

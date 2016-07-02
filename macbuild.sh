@@ -20,7 +20,7 @@ build() {
     make
     cp -r ../build_deps/tachyon-utils/install/osx/* ./
     cp -r ../build_deps/ftl-sdk/build/libftl* ./rundir/RelWithDebInfo
-    cp ../build_deps/ftl-express/ftl-express ./obs/ftl-express
+    cp ../build_deps/go/bin/ftl-express ./rundir/RelWithDebInfo/bin/ftl-express
     sudo python2.7 build_app.py
     sudo chown -R :staff Tachyon.app
 }
@@ -64,6 +64,8 @@ ftl_express() {
     go get -u github.com/WatchBeam/ftl-express
     cd ..
 }
+
+rm -rf build build_deps
 
 dependencies
 build
