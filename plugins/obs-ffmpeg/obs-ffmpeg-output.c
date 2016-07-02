@@ -36,8 +36,6 @@
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
-// #elif __APPLE__
-
 #else
 #include <sys/types.h>
 #include <unistd.h>
@@ -135,8 +133,6 @@ struct ffmpeg_output {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
   SHELLEXECUTEINFO ShExecInfo;
-// #elif __APPLE__
-
 #else
 	pid_t ftl_express_pid;
 #endif
@@ -1208,8 +1204,6 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
-// #elif __APPLE__
-
 #else
 	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
 	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
@@ -1404,8 +1398,6 @@ static void ffmpeg_output_stop(void *data)
 
     CloseHandle( output->pi.hProcess );
     CloseHandle( output->pi.hThread );
-// #elif __APPLE__
-
 #else
 /* print error message if fork() fails */
 	/*send Ctrl+C to ftl express*/
