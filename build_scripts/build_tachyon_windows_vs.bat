@@ -39,7 +39,7 @@ SET ftl_lib_dir=%cd%\%build_config%\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
 REM cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
-cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCOPY_DEPENDENCIES=true ..
+cmake -G "Visual Studio 14 2015 Win64" -DCOPIED_DEPENDENCIES=false -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCOPY_DEPENDENCIES=true ..
 call msbuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.vcxproj || exit /b
 echo "Building FTL-Express"
 pushd .
