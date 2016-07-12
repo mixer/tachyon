@@ -1295,9 +1295,10 @@ static int try_connect(struct ffmpeg_output *output)
 	}
 
 	/* Glue together the ingest URL */
+	int remote_port = ftl_get_remote_port(output->stream_config);
 
 #ifdef _WIN32
-	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_location);
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:%d", config.ingest_location, remote_port);
 	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
   	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);

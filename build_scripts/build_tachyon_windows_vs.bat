@@ -29,7 +29,7 @@ REM current CEF plugin expects this one folder down
 REM copy libcef_dll\%build_config%\libcef_dll_wrapper.lib libcef_dll\
 REM popd
 echo "building libftl"
-call git clone https://github.com/WatchBeam/ftl-sdk.git 
+call git clone https://github.com/WatchBeam/ftl-sdk.git
 cd ftl-sdk
 mkdir build
 cd build
