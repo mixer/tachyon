@@ -26,12 +26,6 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
-#ifdef OS_WINDOWS
-#include <ftl.h>
-#else
-#include <ftl/ftl.h>
-#endif
-
 #ifdef _WIN32
 #include <ftl.h>
 #include <windows.h>
