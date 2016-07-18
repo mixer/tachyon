@@ -204,7 +204,7 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
-	output->audio_component = ftl_create_audio_component(FTL_AUDIO_AAC, 97, config.audio_ssrc);
+	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
 	blog(LOG_WARNING, "test %d %d", config.audio_ssrc, config.video_ssrc);
 	ftl_attach_audio_component_to_stream(output->stream_config, output->audio_component);
 
@@ -671,9 +671,9 @@ static enum AVCodecID get_codec_id(const char *name, int id)
 
 static void set_encoder_ids(struct ffmpeg_data *data)
 {
-	data->output_video->oformat->audio_codec = AV_CODEC_ID_AAC;
+	data->output_video->oformat->audio_codec = AV_CODEC_ID_OPUS;
 	data->output_video->oformat->video_codec = AV_CODEC_ID_H264;
-	data->output_audio->oformat->audio_codec = AV_CODEC_ID_AAC;
+	data->output_audio->oformat->audio_codec = AV_CODEC_ID_OPUS;
 	data->output_audio->oformat->video_codec = AV_CODEC_ID_H264;
 
 /*	data->output_video->oformat->video_codec = get_codec_id(
