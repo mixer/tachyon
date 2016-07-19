@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Tachyon"
 !define DEFAULT_INST_DIR "$PROGRAMFILES\${PRODUCT_NAME}"
-!define PRODUCT_VERSION "1.2.8"
+!define PRODUCT_VERSION "1.3.0 alpha-h264"
 !define PRODUCT_PUBLISHER "Beam Interactive"
 !define PRODUCT_WEB_SITE "http://beam.pro"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\tachyon64.exe"
