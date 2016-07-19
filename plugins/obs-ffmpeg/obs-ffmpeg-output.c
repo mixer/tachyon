@@ -267,6 +267,7 @@ static void parse_params(AVCodecContext *context, char **opts)
 			*assign = 0;
 			value = assign+1;
 
+			blog(LOG_WARNING, "Setting options %s = %s\n", name, value);
 			av_opt_set(context->priv_data, name, value, 0);
 		}
 
@@ -280,7 +281,7 @@ static bool open_video_codec(struct ffmpeg_data *data)
 
 	/* Hardcode in quality=realtime */
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
-	char **opts = strlist_split("quality=realtime", ' ', false);
+	char **opts = strlist_split("quality=realtime profile=high bframes=0 preset=ultrafast tune=zerolatency", ' ', false);
 	int ret;
 
 	if (opts) {

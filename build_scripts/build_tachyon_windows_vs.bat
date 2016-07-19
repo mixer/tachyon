@@ -34,7 +34,7 @@ cd ftl-sdk
 mkdir build
 cd build
 cmake -G "Visual Studio 14 2015 Win64" ..
-call msbuild /t:Rebuild /p:Configuration=%build_config%,Platform=x64 ftl.vcxproj || exit /b
+call msbuild /t:Rebuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.vcxproj || exit /b
 SET ftl_lib_dir=%cd%\%build_config%\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
