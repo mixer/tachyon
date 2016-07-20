@@ -281,7 +281,7 @@ static bool open_video_codec(struct ffmpeg_data *data)
 
 	/* Hardcode in quality=realtime */
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
-	char **opts = strlist_split("quality=realtime profile=high bframes=0 preset=ultrafast tune=zerolatency", ' ', false);
+	char **opts = strlist_split("quality=realtime profile=baseline bframes=0 preset=superfast tune=zerolatency", ' ', false);
 	int ret;
 
 	if (opts) {
@@ -1189,7 +1189,7 @@ static int try_connect(struct ffmpeg_output *output)
 
 	int size = 0;
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350&buffer_size=200000", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;
