@@ -26,13 +26,8 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
-#ifdef OS_WINDOWS
-#include <ftl.h>
-#else
-#include <ftl/ftl.h>
-#endif
-
 #ifdef _WIN32
+#include <ftl.h>
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
@@ -206,7 +201,7 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	ftl_set_ingest_location(output->stream_config, config.ingest_location);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
-	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
+	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
 	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
@@ -272,6 +267,7 @@ static void parse_params(AVCodecContext *context, char **opts)
 			*assign = 0;
 			value = assign+1;
 
+			blog(LOG_WARNING, "Setting options %s = %s\n", name, value);
 			av_opt_set(context->priv_data, name, value, 0);
 		}
 
@@ -285,7 +281,7 @@ static bool open_video_codec(struct ffmpeg_data *data)
 
 	/* Hardcode in quality=realtime */
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
-	char **opts = strlist_split("quality=realtime", ' ', false);
+	char **opts = strlist_split("quality=realtime profile=baseline bframes=0 preset=superfast tune=zerolatency", ' ', false);
 	int ret;
 
 	if (opts) {
@@ -677,9 +673,9 @@ static enum AVCodecID get_codec_id(const char *name, int id)
 static void set_encoder_ids(struct ffmpeg_data *data)
 {
 	data->output_video->oformat->audio_codec = AV_CODEC_ID_OPUS;
-	data->output_video->oformat->video_codec = AV_CODEC_ID_VP8;
+	data->output_video->oformat->video_codec = AV_CODEC_ID_H264;
 	data->output_audio->oformat->audio_codec = AV_CODEC_ID_OPUS;
-	data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+	data->output_audio->oformat->video_codec = AV_CODEC_ID_H264;
 
 /*	data->output_video->oformat->video_codec = get_codec_id(
 			data->config.video_encoder,
@@ -1193,7 +1189,7 @@ static int try_connect(struct ffmpeg_output *output)
 
 	int size = 0;
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350&buffer_size=200000", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;
