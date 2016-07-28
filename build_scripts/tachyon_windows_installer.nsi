@@ -1557,6 +1557,8 @@ Section Uninstall
   Delete "$INSTDIR\obs-plugins\64bit\cef_100_percent.pak"
   Delete "$INSTDIR\obs-plugins\64bit\cef.pak"
   Delete "$INSTDIR\obs-plugins\64bit\cef-bootstrap.exe"
+  Delete "$INSTDIR\obs-plugins\64bit\libGLESv2.dll"
+  Delete "$INSTDIR\obs-plugins\64bit\libEGL.dll"
   Delete "$INSTDIR\bin\64bit\zlib.dll"
   Delete "$INSTDIR\bin\64bit\w32-pthreads.dll"
   Delete "$INSTDIR\bin\64bit\tachyon64.exe"
