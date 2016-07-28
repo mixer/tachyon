@@ -1,10 +1,9 @@
 {
 	"windows": {
-		"year": 2016,
-		"month": 4,
-		"day": 4,
-		"patch": 0,
-		"download": "https://github.com/WatchBeam/tachyon/releases/tag/v1.1.0"
+		"major": 1,
+		"minor": 2,
+		"patch": 11,
+		"download": "https://github.com/WatchBeam/tachyon/releases/tag/v1.2.11"
 	},
 	"mac": {
 		"major": 0,
