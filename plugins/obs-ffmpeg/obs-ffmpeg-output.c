@@ -26,10 +26,16 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
-#ifdef OS_WINDOWS
+#ifdef _WIN32
 #include <ftl.h>
+#include <windows.h>
+#include <process.h>
+#include <Shellapi.h>
 #else
-#include <ftl/ftl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include <wchar.h>
 #endif
 
 #include "obs-ffmpeg-formats.h"
@@ -64,6 +70,7 @@ struct ffmpeg_cfg {
 	char						stream_key[2048];
 	uint32_t					audio_ssrc;
 	uint32_t					video_ssrc;
+
 };
 
 struct ffmpeg_data {
@@ -117,6 +124,13 @@ struct ffmpeg_output {
 	ftl_stream_video_component_t* video_component;
 	ftl_stream_audio_component_t* audio_component;
 
+#ifdef _WIN32
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+  SHELLEXECUTEINFO ShExecInfo;
+#else
+	pid_t ftl_express_pid;
+#endif
 };
 
 /* ------------------------------------------------------------------------- */
@@ -183,7 +197,11 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	ftl_set_ingest_location(output->stream_config, config.ingest_location);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
+#ifdef _FTL_USE_H264
+	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#else 
 	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#endif
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
 	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
@@ -223,7 +241,7 @@ static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
 				avcodec_get_name(id));
 		return false;
 	}
-	
+
 	if (audio == 1) {
 		(*stream)->id = 0;
 	} else {
@@ -249,6 +267,7 @@ static void parse_params(AVCodecContext *context, char **opts)
 			*assign = 0;
 			value = assign+1;
 
+			blog(LOG_WARNING, "Setting options %s = %s\n", name, value);
 			av_opt_set(context->priv_data, name, value, 0);
 		}
 
@@ -261,8 +280,13 @@ static bool open_video_codec(struct ffmpeg_data *data)
 	AVCodecContext *context = data->video->codec;
 
 	/* Hardcode in quality=realtime */
+#ifdef _FTL_USE_H264
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
+	char **opts = strlist_split("quality=realtime profile=baseline bframes=0 preset=superfast tune=zerolatency", ' ', false);
+#else
 	char **opts = strlist_split("quality=realtime", ' ', false);
+#endif
+
 	int ret;
 
 	if (opts) {
@@ -654,9 +678,17 @@ static enum AVCodecID get_codec_id(const char *name, int id)
 static void set_encoder_ids(struct ffmpeg_data *data)
 {
 	data->output_video->oformat->audio_codec = AV_CODEC_ID_OPUS;
+#ifdef _FTL_USE_H264
+	data->output_video->oformat->video_codec = AV_CODEC_ID_H264;
+#else
 	data->output_video->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 	data->output_audio->oformat->audio_codec = AV_CODEC_ID_OPUS;
-	data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+#ifdef _FTL_USE_H264
+	data->output_audio->oformat->video_codec = AV_CODEC_ID_H264;
+#else
+		data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 
 /*	data->output_video->oformat->video_codec = get_codec_id(
 			data->config.video_encoder,
@@ -1131,6 +1163,11 @@ static int try_connect(struct ffmpeg_output *output)
 	obs_data_t *settings;
 	bool success;
 	int ret;
+#ifdef _WIN32
+	wchar_t ftl_ingest_arg[200];
+#else
+	char ftl_ingest_arg[200];
+#endif
 
 	int len;
 	int got_streamkey = 0;
@@ -1162,9 +1199,9 @@ static int try_connect(struct ffmpeg_output *output)
 		return OBS_OUTPUT_ERROR;
 	}
 
-	/* Glue together the ingest URL */
 	int size = 0;
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
+	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350&buffer_size=200000", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;
@@ -1181,7 +1218,7 @@ static int try_connect(struct ffmpeg_output *output)
 	}
 
 	if (config.format == AV_PIX_FMT_NONE) {
-		blog(LOG_DEBUG, "invalid pixel format used for FFmpeg output");
+		blog(LOG_WARNING, "invalid pixel format used for FFmpeg output");
 		return OBS_OUTPUT_ERROR;
 	}
 
@@ -1265,6 +1302,44 @@ static int try_connect(struct ffmpeg_output *output)
 		return OBS_OUTPUT_ERROR;
 	}
 
+	/* Glue together the ingest URL */
+
+#ifdef _WIN32
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_location);
+	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
+  	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
+	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
+	output->ShExecInfo.hwnd = NULL;
+	output->ShExecInfo.lpVerb = L"open";
+	output->ShExecInfo.lpFile = L"ftl-express.exe";	
+	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
+	output->ShExecInfo.lpDirectory = NULL;
+	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
+	output->ShExecInfo.hInstApp = NULL;	
+	ShellExecuteEx(&output->ShExecInfo);
+	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
+#else
+	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
+	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
+	/* print error message if fork() fails */
+	blog(LOG_WARNING, "Forking Process\n");
+
+	if ((output->ftl_express_pid = fork()) < 0)
+	{
+		blog(LOG_ERROR, "call to fork failed\n");
+		return OBS_OUTPUT_ERROR;
+	}
+
+	if (output->ftl_express_pid == 0)
+	{
+		execlp("./ftl-express", "ftl-express", ftl_ingest_arg, NULL);
+
+		blog(LOG_ERROR, "failed to start ftl-express\n");
+		exit(1);
+	}
+#endif
+	
 	obs_output_set_video_conversion(output->output, NULL);
 	obs_output_set_audio_conversion(output->output, &aci);
 	obs_output_begin_data_capture(output->output, 0);
@@ -1311,6 +1386,38 @@ static void ffmpeg_output_stop(void *data)
 		ftl_deactivate_stream(output->stream_config);
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
+		blog(LOG_WARNING, "Closing FTL express\n");
+#ifdef _WIN32
+		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);
+		if (!AttachConsole(pid)) {
+			  DWORD error = GetLastError();
+			  blog(LOG_WARNING, "Failed to attach to console of pid %d -- error was %d\n", pid, error);
+				TerminateProcess(output->ShExecInfo.hProcess, 0);
+		} else {
+			SetConsoleCtrlHandler(NULL, true);
+			// Sent Ctrl-C to the attached console
+			GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+
+			DWORD state;
+
+			if( (state = WaitForSingleObject(output->ShExecInfo.hProcess, 5000)) == WAIT_TIMEOUT) {
+				blog(LOG_WARNING, "Gave up waiting for process to exit...forcible terminating\n");
+				TerminateProcess(output->ShExecInfo.hProcess, 0);
+			}
+			// Re-enable Ctrl-C handling or any subsequently started programs will inherit the disabled state.
+			SetConsoleCtrlHandler(NULL, false);
+			FreeConsole();
+		}
+
+    CloseHandle( output->pi.hProcess );
+    CloseHandle( output->pi.hThread );
+#else
+/* print error message if fork() fails */
+	/*send Ctrl+C to ftl express*/
+	blog(LOG_WARNING, "Sending Ctrl+C to Ftl-express pid %d\n", output->ftl_express_pid );
+	kill(output->ftl_express_pid, SIGINT);
+#endif
+
 	}
 }
 

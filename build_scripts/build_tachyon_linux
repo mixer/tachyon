@@ -16,7 +16,7 @@ function getrepo {
   fi
   git checkout $3
 }
-obs_version=1.1.0
+obs_version=1.2.7
 do_browser=false;
 #do_opus=false;
 #do_vp8=false;
@@ -162,15 +162,25 @@ then
 fi
 cd ..
 ##########################
+#Ftl-Express
+##########################
+echo "Building FTL-Express"
+pushd .
+getrepo ftl-express https://github.com/WatchBeam/ftl-express.git HEAD
+GOPATH=$HOME/gowork go get
+GOPATH=$HOME/gowork go build
+cp ftl-express $INSTALL_PREFIX/bin/
+popd
+##########################
 #Tachyon
 ##########################
 popd
 mkdir build
 cd build
-cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DOBS_VERSION_OVERRIDE=$obs_version ..
+cmake -DUNIX_STRUCTURE=1 -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DOBS_VERSION_OVERRIDE=$obs_version -DFTLSDK_LIB=$INSTALL_PREFIX/lib/libftl.so -DFTLSDK_INCLUDE_DIR=$INSTALL_PREFIX/include ..
 if [ $? -ne 0 ];
 then
-  echo "cmake failure or ftl-sdk, exiting"
+  echo "cmake failure of Tachyon, exiting"
   exit
 fi
 make -j$(grep -c '^processor' /proc/cpuinfo)

@@ -5,6 +5,7 @@
 *.so
 
 #cmake
+*.cmake
 /cmbuild/
 /build/
 /build32/
@@ -20,6 +21,8 @@
 *.ninja
 .ninja*
 .dirstamp
+*.stamp
+*.depend
 
 #xcode
 *.xcodeproj/
@@ -32,6 +35,14 @@ x64/
 ipch/
 GeneratedFiles/
 .moc/
+build_scripts/
+
+#visual studio
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.db
+
 
 /other/
 
@@ -84,3 +95,4 @@ tags
 .DS_Store
 */.DS_Store
 */**/.DS_Store
+build_deps

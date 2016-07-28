@@ -2286,6 +2286,8 @@ static inline enum obs_scale_type GetScaleType(ConfigFile &basicConfig)
 
 static inline enum video_format GetVideoFormatFromName(const char *name)
 {
+	return VIDEO_FORMAT_I420; //We only support I420 for vp8
+
 	if (astrcmpi(name, "I420") == 0)
 		return VIDEO_FORMAT_I420;
 	else if (astrcmpi(name, "NV12") == 0)
@@ -2380,8 +2382,11 @@ bool OBSBasic::ResetAudio()
 	ProfileScope("OBSBasic::ResetAudio");
 
 	struct obs_audio_info ai;
+	/* OPUS requires 48Khz, ignore config file
 	ai.samples_per_sec = config_get_uint(basicConfig, "Audio",
 			"SampleRate");
+*/
+	ai.samples_per_sec = 48000;
 
 	const char *channelSetupStr = config_get_string(basicConfig,
 			"Audio", "ChannelSetup");

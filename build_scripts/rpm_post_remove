@@ -1,3 +1,4 @@
 rm /usr/bin/tachyon
+rm /usr/bin/ftl-express
 rm /etc/ld.so.conf.d/tachyon.conf
 ldconfig
