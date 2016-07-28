@@ -201,7 +201,11 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	ftl_set_ingest_location(output->stream_config, config.ingest_location);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
+#ifdef _FTL_USE_H264
 	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#else 
+	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#endif
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
 	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
@@ -280,8 +284,13 @@ static bool open_video_codec(struct ffmpeg_data *data)
 	AVCodecContext *context = data->video->codec;
 
 	/* Hardcode in quality=realtime */
+#ifdef _FTL_USE_H264
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
 	char **opts = strlist_split("quality=realtime profile=baseline bframes=0 preset=superfast tune=zerolatency", ' ', false);
+#else
+	char **opts = strlist_split("quality=realtime", ' ', false);
+#endif
+
 	int ret;
 
 	if (opts) {
@@ -673,9 +682,17 @@ static enum AVCodecID get_codec_id(const char *name, int id)
 static void set_encoder_ids(struct ffmpeg_data *data)
 {
 	data->output_video->oformat->audio_codec = AV_CODEC_ID_OPUS;
+#ifdef _FTL_USE_H264
 	data->output_video->oformat->video_codec = AV_CODEC_ID_H264;
+#else
+	data->output_video->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 	data->output_audio->oformat->audio_codec = AV_CODEC_ID_OPUS;
+#ifdef _FTL_USE_H264
 	data->output_audio->oformat->video_codec = AV_CODEC_ID_H264;
+#else
+		data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 
 /*	data->output_video->oformat->video_codec = get_codec_id(
 			data->config.video_encoder,
