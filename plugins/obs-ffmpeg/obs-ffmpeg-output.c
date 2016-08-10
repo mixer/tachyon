@@ -25,9 +25,9 @@
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include <ftl/ftl.h>
 
 #ifdef _WIN32
-#include <ftl.h>
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
@@ -199,7 +199,7 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 
 #ifdef _FTL_USE_H264
 	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
-#else 
+#else
 	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
 #endif
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
@@ -1312,11 +1312,11 @@ static int try_connect(struct ffmpeg_output *output)
 	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
 	output->ShExecInfo.hwnd = NULL;
 	output->ShExecInfo.lpVerb = L"open";
-	output->ShExecInfo.lpFile = L"ftl-express.exe";	
-	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
+	output->ShExecInfo.lpFile = L"ftl-express.exe";
+	output->ShExecInfo.lpParameters = ftl_ingest_arg;
 	output->ShExecInfo.lpDirectory = NULL;
 	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
-	output->ShExecInfo.hInstApp = NULL;	
+	output->ShExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 #else
@@ -1339,7 +1339,7 @@ static int try_connect(struct ffmpeg_output *output)
 		exit(1);
 	}
 #endif
-	
+
 	obs_output_set_video_conversion(output->output, NULL);
 	obs_output_set_audio_conversion(output->output, &aci);
 	obs_output_begin_data_capture(output->output, 0);

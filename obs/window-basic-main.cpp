@@ -176,7 +176,7 @@ OBSBasic::OBSBasic(QWidget *parent)
 	installEventFilter(CreateShortcutFilter());
 
 	stringstream name;
-	name << "OBS " << App()->GetVersionString();	
+	name << "OBS " << App()->GetVersionString();
 	blog(LOG_INFO, "%s", name.str().c_str());
 	blog(LOG_INFO, "---------------------------------");
 
@@ -1880,7 +1880,7 @@ void OBSBasic::updateFileFinished(const QString &text, const QString &error)
 
 		long l_major, l_minor, l_patch;
 
-		sscanf_s(OBS_VERSION, "%ld.%ld.%ld", &l_major, &l_minor, &l_patch);
+		sscanf(OBS_VERSION, "%ld.%ld.%ld", &l_major, &l_minor, &l_patch);
 
 		long local_version = MAKE_SEMANTIC_VERSION(l_major, l_minor, l_patch);
 

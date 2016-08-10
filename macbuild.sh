@@ -1,5 +1,10 @@
 #!/bin/sh
 
+libs() {
+    # todo(jamydev): install opus
+    brew install ffmpeg --with-fdk-aac --with-ffplay --with-freetype --with-libass --with-libquvi --with-libvorbis --with-libvpx --with-opus
+}
+
 dependencies() {
     echo "@@ Installing dependencies..."
     mkdir build_deps
@@ -16,7 +21,7 @@ build() {
     echo "@@ Building Tachyon..."
     mkdir build
     cd build
-    cmake ..
+    cmake -DOBS_VERSION_OVERRIDE=1.2.11 ..
     make
     cp -r ../build_deps/tachyon-utils/install/osx/* ./
     cp -r ../build_deps/ftl-sdk/build/libftl* ./rundir/RelWithDebInfo
