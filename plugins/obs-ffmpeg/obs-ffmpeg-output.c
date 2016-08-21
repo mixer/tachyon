@@ -28,6 +28,9 @@
 #include <ftl/ftl.h>
 
 #ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
@@ -66,6 +69,7 @@ struct ffmpeg_cfg {
 
 	/* FTL specific fields */
 	const char			   *ingest_location;
+	char         ingest_ip[20];
 	uint32_t					channel_id;
 	char						stream_key[2048];
 	uint32_t					audio_ssrc;
@@ -180,9 +184,38 @@ int map_ftl_error_to_obs_error(int status) {
 	return ftl_to_obs_error_code;
 }
 
+static int lookup_ingest_ip(const char *ingest_location, char *ingest_ip){
+  struct hostent *remoteHost;
+	struct in_addr addr;
+	int retval = -1;
+	ingest_ip[0] = '\0';
+
+  remoteHost = gethostbyname(ingest_location);
+
+	if(remoteHost) {
+			int i = 0;
+			if (remoteHost->h_addrtype == AF_INET)
+			{
+					while (remoteHost->h_addr_list[i] != 0) {
+							addr.s_addr = *(u_long *) remoteHost->h_addr_list[i++];
+							blog(LOG_INFO, "IP Address #%d of ingest is: %s\n", i, inet_ntoa(addr));
+
+							/*only use the first ip found*/
+							if(strlen(ingest_ip) == 0){
+								strcpy(ingest_ip, inet_ntoa(addr));
+								retval = 0;
+							}
+					}
+			}
+	}
+
+	return retval;
+}
+
 ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_cfg config)
 {
 	ftl_status_t status_code;
+
 
 	/* Use Charon to autheticate and configure muxer settings */
 	ftl_init();
@@ -192,9 +225,9 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	if (status_code != FTL_SUCCESS) {
 	 blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
 	 return OBS_OUTPUT_ERROR;
-   }
+  }
 
-	ftl_set_ingest_location(output->stream_config, config.ingest_location);
+	ftl_set_ingest_location(output->stream_config, config.ingest_ip);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
 #ifdef _FTL_USE_H264
@@ -1176,6 +1209,7 @@ static int try_connect(struct ffmpeg_output *output)
 	settings = obs_output_get_settings(output->output);
 	memset(&config, 0, sizeof(config));
 	config.ingest_location = get_string_or_null(settings, "url");
+	lookup_ingest_ip(config.ingest_location, config.ingest_ip);
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
 			"format_mime_type");
@@ -1189,7 +1223,7 @@ static int try_connect(struct ffmpeg_output *output)
 	full_streamkey = get_string_or_null(settings, "ftl_stream_key");
 
 	/* Build the RTP command line */
-	if (config.ingest_location == NULL) {
+	if (config.ingest_location == NULL || strlen(config.ingest_ip) == 0) {
 		blog(LOG_WARNING, "ingest location blank");
 		return OBS_OUTPUT_ERROR;
 	}
@@ -1305,7 +1339,7 @@ static int try_connect(struct ffmpeg_output *output)
 	/* Glue together the ingest URL */
 
 #ifdef _WIN32
-	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_location);
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_ip);
 	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
   	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -1320,7 +1354,7 @@ static int try_connect(struct ffmpeg_output *output)
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 #else
-	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
+	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_ip);
 	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
 	/* print error message if fork() fails */
 	blog(LOG_WARNING, "Forking Process\n");
