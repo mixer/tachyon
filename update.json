@@ -2,7 +2,7 @@
 	"windows": {
 		"major": 1,
 		"minor": 2,
-		"patch": 12,
+		"patch": 14,
 		"download": "https://github.com/WatchBeam/tachyon/releases/download/v1.2.12/Tachyon_Installer_1.2.12.exe"
 	},
 	"mac": {
