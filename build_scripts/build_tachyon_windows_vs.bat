@@ -21,6 +21,9 @@ SET package=true
 if "%1" == "win64" (
 SET build64=true
 )
+if "%1" == "win32" (
+SET build32=true
+)
 echo "building CEF browser plugin"
 pushd .
 cd ..
@@ -36,11 +39,6 @@ call msbuild /t:Rebuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.v
 SET ftl_lib_dir=%cd%\%build_config%\ftl.lib
 SET ftl_inc_dir=%cd%\..\libftl
 popd
-REM cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCEF_ROOT_DIR=%cef_binary_dir% -DCOPY_DEPENDENCIES=true ..
-REM cmake -G "Visual Studio 14 2015 Win64" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCOPIED_DEPENDENCIES=false -DCOPY_DEPENDENCIES=true ..
-REM call msbuild /p:Configuration=%build_config%,Platform=x64 ALL_BUILD.vcxproj || exit /b
-REM cmake -G "Visual Studio 14 2015" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCOPIED_DEPENDENCIES=false -DCOPY_DEPENDENCIES=true ..
-REM call msbuild /p:Configuration=%build_config% ALL_BUILD.vcxproj || exit /b
 if defined build64 (
 	rmdir CMakeFiles /s /q
 	del CMakeCache.txt
@@ -52,6 +50,7 @@ if defined build32 (
 	del CMakeCache.txt
 	cmake -G "Visual Studio 14 2015" -DOBS_VERSION_OVERRIDE=%obs_version% -DFTLSDK_LIB=%ftl_lib_dir% -DFTLSDK_INCLUDE_DIR=%ftl_inc_dir% -DCOPIED_DEPENDENCIES=false -DCOPY_DEPENDENCIES=true ..
 	call msbuild /p:Configuration=%build_config% ALL_BUILD.vcxproj
+	REM Note there will be some errors compiling this as ftl.sdk x86 isnt build but we only need a few binaries from the 32bit version so those errors can be ignored
 )
 echo "Building FTL-Express"
 pushd .

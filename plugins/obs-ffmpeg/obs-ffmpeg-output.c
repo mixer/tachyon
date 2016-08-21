@@ -25,7 +25,7 @@
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
-#include <ftl/ftl.h>
+#include <ftl.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
