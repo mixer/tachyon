@@ -32,7 +32,7 @@ find_path(FTLSDK_INCLUDE_DIR
 		${DepsPath}
 		${_FTL_INCLUDE_DIRS}
 	PATHS
-		/usr/include /usr/local/include /opt/local/include /sw/include
+		/usr/include /usr/local/include /opt/local/include /sw/include /usr/local/include/ftl
 	PATH_SUFFIXES
 		include)
 

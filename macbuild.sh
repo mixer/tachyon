@@ -13,7 +13,7 @@ dependencies() {
     ftl_sdk
     tachyon_utils
     ftl_express
-    export CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.6.0/lib/cmake/Qt5Widgets
+#    export CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.6.0/lib/cmake/Qt5Widgets
     cd ..
 }
 

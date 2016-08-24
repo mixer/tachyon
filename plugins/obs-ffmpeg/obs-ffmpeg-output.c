@@ -39,6 +39,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <wchar.h>
+
+#include <netdb.h>
+#include <arpa/inet.h>
 #endif
 
 #include "obs-ffmpeg-formats.h"
