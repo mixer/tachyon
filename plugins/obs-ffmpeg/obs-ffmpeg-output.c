@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#define _FTL_USE_H264
+//#define _FTL_USE_H264
 
 #include <obs-module.h>
 #include <util/circlebuf.h>
