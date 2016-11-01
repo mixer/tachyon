@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+#define _FTL_USE_H264
+
 #include <obs-module.h>
 #include <util/circlebuf.h>
 #include <util/threading.h>
@@ -25,19 +27,15 @@
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
-
-#ifdef OS_WINDOWS
 #include <ftl.h>
-#else
-#include <ftl/ftl.h>
-#endif
 
 #ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
 #include <process.h>
 #include <Shellapi.h>
-#elif __APPLE__
-
 #else
 #include <sys/types.h>
 #include <unistd.h>
@@ -73,6 +71,7 @@ struct ffmpeg_cfg {
 
 	/* FTL specific fields */
 	const char			   *ingest_location;
+	char         ingest_ip[20];
 	uint32_t					channel_id;
 	char						stream_key[2048];
 	uint32_t					audio_ssrc;
@@ -106,7 +105,7 @@ struct ffmpeg_data {
 	AVFrame            *aframe;
 
 	struct ffmpeg_cfg  config;
-	
+
 	bool               initialized;
 };
 
@@ -130,13 +129,11 @@ struct ffmpeg_output {
 	ftl_stream_configuration_t* stream_config;
 	ftl_stream_video_component_t* video_component;
 	ftl_stream_audio_component_t* audio_component;
-	
-#ifdef _WIN32	
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;		
-  SHELLEXECUTEINFO ShExecInfo;
-#elif __APPLE__
 
+#ifdef _WIN32
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+  SHELLEXECUTEINFO ShExecInfo;
 #else
 	pid_t ftl_express_pid;
 #endif
@@ -189,9 +186,38 @@ int map_ftl_error_to_obs_error(int status) {
 	return ftl_to_obs_error_code;
 }
 
+static int lookup_ingest_ip(const char *ingest_location, char *ingest_ip){
+  struct hostent *remoteHost;
+	struct in_addr addr;
+	int retval = -1;
+	ingest_ip[0] = '\0';
+
+  remoteHost = gethostbyname(ingest_location);
+
+	if(remoteHost) {
+			int i = 0;
+			if (remoteHost->h_addrtype == AF_INET)
+			{
+					while (remoteHost->h_addr_list[i] != 0) {
+							addr.s_addr = *(u_long *) remoteHost->h_addr_list[i++];
+							blog(LOG_INFO, "IP Address #%d of ingest is: %s\n", i, inet_ntoa(addr));
+
+							/*only use the first ip found*/
+							if(strlen(ingest_ip) == 0){
+								strcpy(ingest_ip, inet_ntoa(addr));
+								retval = 0;
+							}
+					}
+			}
+	}
+
+	return retval;
+}
+
 ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_cfg config)
 {
 	ftl_status_t status_code;
+
 
 	/* Use Charon to autheticate and configure muxer settings */
 	ftl_init();
@@ -201,12 +227,16 @@ ftl_status_t attempt_ftl_connection(struct ffmpeg_output *output, struct ffmpeg_
 	if (status_code != FTL_SUCCESS) {
 	 blog(LOG_WARNING, "Failed to initialize stream configuration: errno %d\n", status_code);
 	 return OBS_OUTPUT_ERROR;
-   }
+  }
 
-	ftl_set_ingest_location(output->stream_config, config.ingest_location);
+	ftl_set_ingest_location(output->stream_config, config.ingest_ip);
 	ftl_set_authetication_key(output->stream_config, config.channel_id, config.stream_key);
 
+#ifdef _FTL_USE_H264
+	output->video_component = ftl_create_video_component(FTL_VIDEO_H264, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#else
 	output->video_component = ftl_create_video_component(FTL_VIDEO_VP8, 96, config.video_ssrc, config.scale_width, config.scale_height);
+#endif
 	ftl_attach_video_component_to_stream(output->stream_config, output->video_component);
 
 	output->audio_component = ftl_create_audio_component(FTL_AUDIO_OPUS, 97, config.audio_ssrc);
@@ -246,7 +276,7 @@ static bool new_stream(struct ffmpeg_data *data, AVStream **stream,
 				avcodec_get_name(id));
 		return false;
 	}
-	
+
 	if (audio == 1) {
 		(*stream)->id = 0;
 	} else {
@@ -272,6 +302,7 @@ static void parse_params(AVCodecContext *context, char **opts)
 			*assign = 0;
 			value = assign+1;
 
+			blog(LOG_WARNING, "Setting options %s = %s\n", name, value);
 			av_opt_set(context->priv_data, name, value, 0);
 		}
 
@@ -284,8 +315,13 @@ static bool open_video_codec(struct ffmpeg_data *data)
 	AVCodecContext *context = data->video->codec;
 
 	/* Hardcode in quality=realtime */
+#ifdef _FTL_USE_H264
 	//char **opts = strlist_split(data->config.video_settings, ' ', false);
+	char **opts = strlist_split("quality=realtime profile=baseline bframes=0 preset=superfast tune=zerolatency", ' ', false);
+#else
 	char **opts = strlist_split("quality=realtime", ' ', false);
+#endif
+
 	int ret;
 
 	if (opts) {
@@ -677,9 +713,17 @@ static enum AVCodecID get_codec_id(const char *name, int id)
 static void set_encoder_ids(struct ffmpeg_data *data)
 {
 	data->output_video->oformat->audio_codec = AV_CODEC_ID_OPUS;
+#ifdef _FTL_USE_H264
+	data->output_video->oformat->video_codec = AV_CODEC_ID_H264;
+#else
 	data->output_video->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 	data->output_audio->oformat->audio_codec = AV_CODEC_ID_OPUS;
-	data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+#ifdef _FTL_USE_H264
+	data->output_audio->oformat->video_codec = AV_CODEC_ID_H264;
+#else
+		data->output_audio->oformat->video_codec = AV_CODEC_ID_VP8;
+#endif
 
 /*	data->output_video->oformat->video_codec = get_codec_id(
 			data->config.video_encoder,
@@ -1156,7 +1200,7 @@ static int try_connect(struct ffmpeg_output *output)
 	int ret;
 #ifdef _WIN32
 	wchar_t ftl_ingest_arg[200];
-#else 
+#else
 	char ftl_ingest_arg[200];
 #endif
 
@@ -1167,6 +1211,7 @@ static int try_connect(struct ffmpeg_output *output)
 	settings = obs_output_get_settings(output->output);
 	memset(&config, 0, sizeof(config));
 	config.ingest_location = get_string_or_null(settings, "url");
+	lookup_ingest_ip(config.ingest_location, config.ingest_ip);
 	config.format_name = get_string_or_null(settings, "format_name");
 	config.format_mime_type = get_string_or_null(settings,
 			"format_mime_type");
@@ -1180,7 +1225,7 @@ static int try_connect(struct ffmpeg_output *output)
 	full_streamkey = get_string_or_null(settings, "ftl_stream_key");
 
 	/* Build the RTP command line */
-	if (config.ingest_location == NULL) {
+	if (config.ingest_location == NULL || strlen(config.ingest_ip) == 0) {
 		blog(LOG_WARNING, "ingest location blank");
 		return OBS_OUTPUT_ERROR;
 	}
@@ -1190,10 +1235,9 @@ static int try_connect(struct ffmpeg_output *output)
 		return OBS_OUTPUT_ERROR;
 	}
 
-
 	int size = 0;
 	//size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", config.ingest_location);
-	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350", "127.0.0.1");
+	size = snprintf(config.url, 2048, "rtp://%s:8082?pkt_size=1350&buffer_size=200000", "127.0.0.1");
 	if (size == 2048) {
 		blog(LOG_WARNING, "snprintf failed on URL");
 		return OBS_OUTPUT_ERROR;
@@ -1299,42 +1343,41 @@ static int try_connect(struct ffmpeg_output *output)
 
 #ifdef _WIN32
 	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:%d", config.ingest_location, remote_port);
+
 	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
   	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 	output->ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; //SEE_MASK_WAITFORINPUTIDLE
 	output->ShExecInfo.hwnd = NULL;
 	output->ShExecInfo.lpVerb = L"open";
-	output->ShExecInfo.lpFile = L"ftl-express.exe";	
-	output->ShExecInfo.lpParameters = ftl_ingest_arg;	
+	output->ShExecInfo.lpFile = L"ftl-express.exe";
+	output->ShExecInfo.lpParameters = ftl_ingest_arg;
 	output->ShExecInfo.lpDirectory = NULL;
 	output->ShExecInfo.nShow = /*SW_SHOW;*/SW_HIDE;
-	output->ShExecInfo.hInstApp = NULL;	
+	output->ShExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
-#elif __APPLE__
-
 #else
-	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_location);
+	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:%d", config.ingest_ip, remote_port);
 	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
 	/* print error message if fork() fails */
 	blog(LOG_WARNING, "Forking Process\n");
 
-	if((output->ftl_express_pid = fork()) < 0 )
+	if ((output->ftl_express_pid = fork()) < 0)
 	{
 		blog(LOG_ERROR, "call to fork failed\n");
 		return OBS_OUTPUT_ERROR;
 	}
 
-	if(output->ftl_express_pid == 0)
-	{ 
-		execlp("ftl-express", "ftl-express", ftl_ingest_arg, NULL);
+	if (output->ftl_express_pid == 0)
+	{
+		execlp("./ftl-express", "ftl-express", ftl_ingest_arg, NULL);
 
 		blog(LOG_ERROR, "failed to start ftl-express\n");
 		exit(1);
 	}
 #endif
-	
+
 	obs_output_set_video_conversion(output->output, NULL);
 	obs_output_set_audio_conversion(output->output, &aci);
 	obs_output_begin_data_capture(output->output, 0);
@@ -1382,8 +1425,8 @@ static void ffmpeg_output_stop(void *data)
 		ftl_destory_stream(&(output->stream_config));
 		output->stream_config = 0; /* FTL requires the pointer be 0ed out */
 		blog(LOG_WARNING, "Closing FTL express\n");
-#ifdef _WIN32	
-		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);		
+#ifdef _WIN32
+		unsigned int pid = GetProcessId(output->ShExecInfo.hProcess);
 		if (!AttachConsole(pid)) {
 			  DWORD error = GetLastError();
 			  blog(LOG_WARNING, "Failed to attach to console of pid %d -- error was %d\n", pid, error);
@@ -1392,28 +1435,26 @@ static void ffmpeg_output_stop(void *data)
 			SetConsoleCtrlHandler(NULL, true);
 			// Sent Ctrl-C to the attached console
 			GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
-			
+
 			DWORD state;
-			
+
 			if( (state = WaitForSingleObject(output->ShExecInfo.hProcess, 5000)) == WAIT_TIMEOUT) {
 				blog(LOG_WARNING, "Gave up waiting for process to exit...forcible terminating\n");
 				TerminateProcess(output->ShExecInfo.hProcess, 0);
-			} 
+			}
 			// Re-enable Ctrl-C handling or any subsequently started programs will inherit the disabled state.
-			SetConsoleCtrlHandler(NULL, false);		
+			SetConsoleCtrlHandler(NULL, false);
 			FreeConsole();
 		}
-		
-    CloseHandle( output->pi.hProcess );
-    CloseHandle( output->pi.hThread );		
-#elif __APPLE__
 
+    CloseHandle( output->pi.hProcess );
+    CloseHandle( output->pi.hThread );
 #else
 /* print error message if fork() fails */
 	/*send Ctrl+C to ftl express*/
 	blog(LOG_WARNING, "Sending Ctrl+C to Ftl-express pid %d\n", output->ftl_express_pid );
 	kill(output->ftl_express_pid, SIGINT);
-#endif		
+#endif
 
 	}
 }

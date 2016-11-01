@@ -176,7 +176,7 @@ OBSBasic::OBSBasic(QWidget *parent)
 	installEventFilter(CreateShortcutFilter());
 
 	stringstream name;
-	name << "OBS " << App()->GetVersionString();	
+	name << "OBS " << App()->GetVersionString();
 	blog(LOG_INFO, "%s", name.str().c_str());
 	blog(LOG_INFO, "---------------------------------");
 
@@ -1868,24 +1868,28 @@ void OBSBasic::updateFileFinished(const QString &text, const QString &error)
 	const char *download    = obs_data_get_string(versionData, "download");
 
 	if (returnData && versionData && description && download) {
-		long year  = obs_data_get_int(versionData, "year");
-		long month = obs_data_get_int(versionData, "month");
-		long date  = obs_data_get_int(versionData, "day");
+		long major  = obs_data_get_int(versionData, "major");
+		long minor = obs_data_get_int(versionData, "minor");
 		long patch = obs_data_get_int(versionData, "patch");
 
-		long version = MAKE_TACHYON_VERSION(year, month, date, patch);
+		long version = MAKE_SEMANTIC_VERSION(major, minor, patch);
 
 		blog(LOG_INFO, "Update check: last known remote version "
-				"is %ld.%ld.%ld.%ld",
-				year, month, date, patch);
+				"is %ld.%ld.%ld",
+				major, minor, patch);
 
-		if (version > TACHYON_VER) {
+		long l_major, l_minor, l_patch;
+
+		sscanf(OBS_VERSION, "%ld.%ld.%ld", &l_major, &l_minor, &l_patch);
+
+		long local_version = MAKE_SEMANTIC_VERSION(l_major, l_minor, l_patch);
+
+		if (version > local_version) {
 			QString     str = QTStr("UpdateAvailable.Text");
 			QMessageBox messageBox(this);
 
-			str = str.arg(QString::number(year),
-			              QString::number(month),
-						  QString::number(date),
+			str = str.arg(QString::number(major),
+			              QString::number(minor),
 						  QString::number(patch),
 			              download);
 

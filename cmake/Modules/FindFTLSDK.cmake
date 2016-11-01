@@ -20,7 +20,7 @@ else()
 endif()
 
 find_path(FTLSDK_INCLUDE_DIR
-	NAMES ftl/ftl.h
+	NAMES ftl.h
 	HINTS
 		ENV FTLPath${_lib_suffix}
 		ENV FTLPath
