@@ -1,7 +1,7 @@
 REM check for cef binary
 REM check for dependencies (ffmpeg, etc)
 SET build_config=Release
-SET obs_version=1.2.14
+SET obs_version=1.2.15
 SET cef_binary_dir=C:\beam\cef_binary
 SET cef_release_dir=C:\beam\obs-browser-1.22
 SET coredeps=C:\beam\tachyon_deps
@@ -30,7 +30,7 @@ cd ..
 call git submodule update --init
 cd ..
 echo "building libftl"
-call git clone https://github.com/WatchBeam/ftl-sdk.git 
+call git clone https://github.com/WatchBeam/ftl-sdk.git
 cd ftl-sdk
 mkdir build
 cd build

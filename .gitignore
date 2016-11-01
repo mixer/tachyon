@@ -42,6 +42,7 @@ build_scripts/
 *.vcxproj.filters
 *.sln
 *.db
+*db-wal
 
 
 /other/

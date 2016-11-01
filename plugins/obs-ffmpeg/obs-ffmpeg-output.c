@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+//#define _FTL_USE_H264
+
 #include <obs-module.h>
 #include <util/circlebuf.h>
 #include <util/threading.h>
@@ -1337,9 +1339,11 @@ static int try_connect(struct ffmpeg_output *output)
 	}
 
 	/* Glue together the ingest URL */
+	int remote_port = ftl_get_remote_port(output->stream_config);
 
 #ifdef _WIN32
-	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:8082", config.ingest_ip);
+	swprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg)/sizeof(wchar_t), L"-rtpingestaddr=%hs:%d", config.ingest_location, remote_port);
+
 	blog(LOG_WARNING, "FTL ingest args are: %S\n", ftl_ingest_arg);
   	ZeroMemory( &output->ShExecInfo, sizeof(output->ShExecInfo) );
 	output->ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -1354,7 +1358,7 @@ static int try_connect(struct ffmpeg_output *output)
 	ShellExecuteEx(&output->ShExecInfo);
 	SetPriorityClass(output->ShExecInfo.hProcess, HIGH_PRIORITY_CLASS);
 #else
-	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:8082", config.ingest_ip);
+	snprintf(ftl_ingest_arg, sizeof(ftl_ingest_arg), "-rtpingestaddr=%s:%d", config.ingest_ip, remote_port);
 	blog(LOG_WARNING, "FTL ingest args are: %s\n", ftl_ingest_arg);
 	/* print error message if fork() fails */
 	blog(LOG_WARNING, "Forking Process\n");
