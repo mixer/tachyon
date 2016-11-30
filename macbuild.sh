@@ -13,7 +13,7 @@ dependencies() {
     ftl_sdk
     tachyon_utils
     ftl_express
-    export CMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.6.0/lib/cmake/Qt5Widgets
+    export CMAKE_PREFIX_PATH=/usr/local/opt/qt5/lib/cmake/Qt5Widgets
     cd ..
 }
 
@@ -21,7 +21,7 @@ build() {
     echo "@@ Building Tachyon..."
     mkdir build
     cd build
-    cmake -DOBS_VERSION_OVERRIDE=1.2.11 ..
+    cmake -DOBS_VERSION_OVERRIDE=1.2.16 -DFTLSDK_LIB=$ftl_lib_dir -DFTLSDK_INCLUDE_DIR=$ftl_inc_dir ..
     make
     cp -r ../build_deps/tachyon-utils/install/osx/* ./
     cp -r ../build_deps/ftl-sdk/build/libftl* ./rundir/RelWithDebInfo
@@ -32,7 +32,7 @@ build() {
 
 archive() {
     echo "@@ Archiving build to DMG..."
-    hdiutil create -fs HFS+ -megabytes 70 -volname 'Tachyon Install' Tachyon.dmg
+    hdiutil create -fs HFS+ -megabytes 120 -volname 'Tachyon Install' Tachyon.dmg
     hdiutil mount Tachyon.dmg
     cp -r ./Tachyon.app "/Volumes/Tachyon Install/Tachyon.app"
     hdiutil unmount "/Volumes/Tachyon Install"
@@ -42,20 +42,23 @@ archive() {
 
 ftl_sdk() {
     echo "@@ Cloning ftl-sdk..."
-    git clone git@github.com:WatchBeam/ftl-sdk
+    git clone https://github.com/WatchBeam/ftl-sdk
     cd ftl-sdk
+    cd libftl
+    export ftl_inc_dir=$(pwd)
+    cd ..
     mkdir build
     cd build
     echo "@@ Building ftl-sdk..."
     cmake .. && make
-    export FTLSDK_INCLUDE_DIR=$(pwd)
-    echo "@@ Using FTL-SDK from $FTLSDK_INCLUDE_DIR"
+    export ftl_lib_dir=$(pwd)/libftl.dylib
+    echo "@@ Using FTL-SDK from $ftl_inc_dir"
     cd ../..
 }
 
 tachyon_utils() {
     echo "@@ Cloning tachyon_utils..."
-    git clone git@github.com:WatchBeam/tachyon-utils
+    git clone https://github.com/WatchBeam/tachyon-utils
     cd tachyon-utils
     git checkout tachyon-mac
     cd ..

@@ -27,9 +27,9 @@
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
-#include <ftl.h>
 
 #ifdef _WIN32
+#include <ftl.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -37,10 +37,15 @@
 #include <process.h>
 #include <Shellapi.h>
 #else
+#include <ftl.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
 #include <wchar.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 #include "obs-ffmpeg-formats.h"
